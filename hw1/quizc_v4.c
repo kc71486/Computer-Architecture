@@ -26,16 +26,16 @@ uint32_t get_highest_digit(uint32_t x) {
 /* int32 multiply */
 jint64_t imul32(int32_t a, int32_t b) {
     uint32_t ua = a;
-    int32_t ah; // added higher word
-    int32_t al; // added lower word
+    int32_t ah; /* added higher word */
+    int32_t al; /* added lower word */
     int32_t carry;
     int32_t tmp;
-    int32_t rh = 0; //result higher word
-    int32_t rl = 0; //result lower word
+    int32_t rh = 0; /* result higher word */
+    int32_t rl = 0; /* result lower word */
     for(int32_t i = 0; i < 32; i++) {
         if((b >> i & 1) == 1) {
             al = ua << i;
-            ah = ua >> (31 - i) >> 1;// prevent no shift
+            ah = ua >> (31 - i) >> 1;/* prevent no shift */
             tmp = rl;
             rl = rl + al;
             carry = ((tmp ^ al) & ~rl | (tmp & al)) >> 31 & 1;
@@ -63,7 +63,7 @@ float fmul32(float a, float b) {
     int32_t er;
     /* define result */
     int32_t result;
-    /*special values*/
+    /* special values */
     if(ea == 0xFF && ma != 0x800000) {
         int32_t f_nan = 0x7FF80001;
         return *(float *) &f_nan;
@@ -136,7 +136,7 @@ float fadd32(float a, float b) {
     int32_t er;
     /* define result */
     int32_t result;
-    /*special values*/
+    /* special values */
     if(ea == 0xFF && ma != 0x800000) {
         int32_t f_nan = 0x7FF80001;
         return *(float *) &f_nan;
@@ -219,6 +219,12 @@ float fadd32(float a, float b) {
     result = (sr << 31) | ((er & 0xFF) << 23) | (mr & 0x7FFFFF);
     return *(float *) &result;
 }
+/* pre allocate memory for showcase
+   because I don't know where heap start and ripes doesn't have the system call*/
+float *ret1 = {0, 0, 0};
+float *ret2 = {0, 0, 0};
+float *ret3 = {0, 0, 0};
+float **ret = {ret1, ret2, ret3};
 float **matmul(float **a, float **b, int m, int n, int o) {
     /* (m * n) * (n * o) -> (m * o) */
     float subtotal;
