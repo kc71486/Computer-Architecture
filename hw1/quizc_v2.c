@@ -227,11 +227,11 @@ float fadd32(float a, float b) {
     er = er - (24 - digits);
     /* overflow and underflow */
     if(er < 0) {
-        int f_zero = 0 | (sa ^ sb) << 31;
+        int f_zero = 0 | sr << 31;
         return *(float *) &f_zero;
     }
     if(er >= 0xFF) {
-        int f_inf = 0x7F800000 | (sa ^ sb) << 31;
+        int f_inf = 0x7F800000 | sr << 31;
         return *(float *) &f_inf;
     }
     /* result */
