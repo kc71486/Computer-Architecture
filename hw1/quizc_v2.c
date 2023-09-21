@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <stdlib.h>
 #include <stdint.h>
 
 typedef struct {
@@ -257,24 +257,27 @@ float **matmul(float **a, float **b, int m, int n, int o) {
     return ret;
 }
 int main() {
-    float *a1 = {0.89, 0.18, 0.04};
-    float *a2 = {0.07, 1, 0.2};
-    float *a3 = {0.13, 0, 0.7};
-    float **a = {a1, a2, a3};
-    float *b1 = {0.02, 1.01, 0.14};
-    float *b2 = {0.1, 0.14, 0.99};
-    float *b3 = {0.87, 0.2, 0.09};
-    float **b = {b1, b2, b3};
+	float a1[] = {0.89f, 0.18f, 0.04f};
+	float a2[] = {0.07f, 1.0f, 0.2f};
+	float a3[] = {0.13f, 0.0f, 0.7f};
+	float *a[] = {a1, a2, a3};
+	float b1[] = {0.02f, 1.01f, 0.14f};
+	float b2[] = {0.1f, 0.14f, 0.99f};
+	float b3[] = {0.87f, 0.2f, 0.09f};
+	float *b[] = {b1, b2, b3};
     /*
     answer should be
     0.0706  0.9321  0.3064
     0.2753  0.2507  1.0178
     0.6116  0.2713  0.0812
     */
-    float **c = matmul(a, b, 3, 3, 3);
+	printf("result:\n");
+	float **c = matmul(a, b, 3, 3, 3);
     for(int i = 0; i < 3; i ++) {
         for(int j = 0; j < 3; j ++) {
-            printf("%f\n", c[i][j]);
+            printf("%f", c[i][j]);
+            printf(" ");
         }
+        printf("\n");
     }
 }

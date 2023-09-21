@@ -212,11 +212,11 @@ float fadd32(float a, float b) {
     er = er - (24 - digits);
     /* overflow and underflow */
     if(er < 0) {
-        int f_zero = sr << 31;
+        int32_t f_zero = sr << 31;
         return *(float *) &f_zero;
     }
     if(er >= 0xFF) {
-        int f_inf = 0x7F800000 | sr << 31;
+        int32_t f_inf = 0x7F800000 | sr << 31;
         return *(float *) &f_inf;
     }
     /* result */
@@ -224,16 +224,16 @@ float fadd32(float a, float b) {
     return *(float *) &result;
 }
 float retdata[9] = {0}; /* preserve space for malloc replacement */
-matf32_t *retmat = {.row = 0, .col = 0, .data = NULL}; /* preserve space, not initialize */
+matf32_t retmat = {0, 0, 0}; /* preserve space, not initialize */
 matf32_t *matmul(matf32_t *first, matf32_t *second) {
     /* (m * n) * (n * o) -> (m * o) */
-    int m = first->row;
-    int n = first->col;
-    int o = second->col;
+    int32_t m = first->row;
+    int32_t n = first->col;
+    int32_t o = second->col;
     if(n != second->row) {
         return NULL;
     }
-    matf32_t *ret = retmat; /* replace malloc struct */
+    matf32_t *ret = &retmat; /* replace malloc struct */
     ret->row = m;
     ret->col = o;
     ret->data = retdata; /* replace malloc array */
@@ -241,40 +241,47 @@ matf32_t *matmul(matf32_t *first, matf32_t *second) {
     float *b = second->data;
     float *c = ret->data;
     float subtotal;
+	int32_t arow = 0;
+	int32_t aidx;
+	int32_t bidx;
+	int32_t cidx = 0;
     for(int i = 0; i < m; i ++) {
-        for(int j = 0; j < o; j ++) {
+        for(int32_t j = 0; j < o; j ++) {
             subtotal = 0;
-            for(int k = 0; k < n; k ++) {
-                subtotal = fadd32(subtotal, fmul32(a[i * n + k], b[k * o + j]));
+			aidx = arow;
+			bidx = j;
+            for(int32_t k = 0; k < n; k ++) {
+                subtotal = fadd32(subtotal, fmul32(a[aidx], b[bidx]));
+				aidx += 1;
+				bidx += o;
             }
-            c[i * o + j] = subtotal;
+            c[cidx] = subtotal;
+			cidx += 1;
         }
+		arow += n;
     }
     return ret;
 }
+float aarr[9] = {0.89f, 0.18f, 0.04f,
+			  0.07f, 1.0f, 0.2f,
+			  0.13f, 0.0f, 0.7f};
+float barr[9] = {0.02f, 1.01f, 0.14f,
+			  0.1f, 0.14f, 0.99f,
+			  0.87f, 0.2f, 0.09f};
+matf32_t amat = {.row = 3, .col = 3, .data = aarr};
+matf32_t bmat = {.row = 3, .col = 3, .data = barr};
 int main() {
-    float a[9] = {0.89, 0.18, 0.04,
-                  0.07, 1, 0.2,
-                  0.13, 0, 0.7};
-    float b[9] = {0.02, 1.01, 0.14,
-                  0.1, 0.14, 0.99,
-                  0.87, 0.2, 0.09};
-    matf32_t amat = {.row = 3, .col = 3, .data = a};
-    matf32_t bmat = {.row = 3, .col = 3, .data = b};
     /*
     answer should be
     0.0706  0.9321  0.3064
     0.2753  0.2507  1.0178
     0.6116  0.2713  0.0812
     */
-    matf32_t *cmat = matmul(amat, bmat);
+    matf32_t *cmat = matmul(&amat, &bmat);
     float *c = cmat->data;
     printf("result:\n");
-    for(int i = 0; i < 3; i ++) {
-        for(int j = 0; j < 3; j ++) {
-            printf("%f", c[i * 3 + j]);
-            printf(" ");
-        }
-        printf("\n");
+    for(int i = 0; i < 9; i ++) {
+        printf("%f\n", c[i]);
     }
+	return 0;
 }
