@@ -37,7 +37,7 @@ jint64_t imul32(int32_t a, int32_t b) {
     int32_t rh = 0; /* result higher word */
     int32_t rl = 0; /* result lower word */
     for(int32_t i = 0; i < 32; i++) {
-        if((b >> i & 1) == 1) {
+        if((b >> i & 1) != 0) {
             al = ua << i;
             ah = ua >> (31 - i) >> 1;/* prevent no shift */
             tmp = rl;
