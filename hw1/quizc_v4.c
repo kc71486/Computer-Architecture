@@ -241,24 +241,24 @@ matf32_t *matmul(matf32_t *first, matf32_t *second) {
     float *b = second->data;
     float *c = ret->data;
     float subtotal;
-	int32_t arow = 0;
-	int32_t aidx;
-	int32_t bidx;
-	int32_t cidx = 0;
+    int32_t arow = 0;
+    int32_t aidx;
+    int32_t bidx;
+    int32_t cidx = 0;
     for(int i = 0; i < m; i ++) {
         for(int32_t j = 0; j < o; j ++) {
             subtotal = 0;
-			aidx = arow;
-			bidx = j;
+            aidx = arow;
+            bidx = j;
             for(int32_t k = 0; k < n; k ++) {
                 subtotal = fadd32(subtotal, fmul32(a[aidx], b[bidx]));
-				aidx += 1;
-				bidx += o;
+                aidx += 1;
+                bidx += o;
             }
             c[cidx] = subtotal;
-			cidx += 1;
+            cidx += 1;
         }
-		arow += n;
+        arow += n;
     }
     return ret;
 }
