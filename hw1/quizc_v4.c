@@ -30,6 +30,7 @@ uint32_t get_highest_digit(uint32_t x) {
 /* int32 multiply */
 jint64_t imul32(int32_t a, int32_t b) {
     uint32_t ua = a;
+    uint32_t ub = b;
     int32_t ah; /* added higher word */
     int32_t al; /* added lower word */
     int32_t carry;
@@ -37,7 +38,7 @@ jint64_t imul32(int32_t a, int32_t b) {
     int32_t rh = 0; /* result higher word */
     int32_t rl = 0; /* result lower word */
     for(int32_t i = 0; i < 32; i++) {
-        if((b >> i & 1) != 0) {
+        if((ub >> i & 1) != 0) {
             al = ua << i;
             ah = ua >> (31 - i) >> 1;/* prevent no shift */
             tmp = rl;
