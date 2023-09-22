@@ -5,8 +5,19 @@
 typedef struct {
     int32_t row;
     int32_t col;
-    float *data;
+    int32_t *data;
 } matf32_t;
+
+int32_t aarr[9] = {0x3f63d70a, 0x3e3851ec, 0x3d23d70a,
+			  0x3d8f5c29, 0x3f800000, 0x3e4ccccd,
+			  0x3e051eb8, 0x00000000, 0x3f333333};
+int32_t barr[9] = {0x3ca3d70a, 0x3f8147ae, 0x3e0f5c29,
+			  0x3dcccccd, 0x3e0f5c29, 0x3f7d70a4,
+			  0x3f5eb852, 0x3e4ccccd, 0x3db851ec};
+matf32_t amat = {.row = 3, .col = 3, .data = aarr};
+matf32_t bmat = {.row = 3, .col = 3, .data = barr};
+int32_t retdata[9] = {0}; /* preserve space for malloc replacement */
+matf32_t retmat = {0, 0, 0}; /* preserve space, not initialize */
 
 uint32_t highestbit(uint32_t x) {
     x |= (x >> 1);
@@ -36,9 +47,7 @@ int32_t mmul(int32_t a, int32_t b) {
     return r;
 }
 /* float32 multiply */
-float fmul32(float a, float b) {
-    int32_t ia = *(int32_t *) &a;
-    int32_t ib = *(int32_t *) &b;
+int32_t fmul32(int32_t ia, int32_t ib) {
     /* define sign */
     int32_t sa = ia >> 31;
     int32_t sb = ib >> 31;
@@ -57,26 +66,26 @@ float fmul32(float a, float b) {
     if(ea == 0xFF) {
         if(ma != 0x800000 || eb == 0) {
             int32_t f_nan = 0x7FF80001;
-            return *(float *) &f_nan;
+            return f_nan;
         }
         else {
             int32_t f_inf = 0x7F800000 | (sa ^ sb) << 31;
-            return *(float *) &f_inf;
+            return f_inf;
         }
     }
     if(eb == 0xFF) {
         if(mb != 0x800000 || ea == 0) {
             int32_t f_nan = 0x7FF80001;
-            return *(float *) &f_nan;
+            return f_nan;
         }
         else {
             int32_t f_inf = 0x7F800000 | (sa ^ sb) << 31;
-            return *(float *) &f_inf;
+            return f_inf;
         }
     }
     if(ea == 0 || eb == 0) {
         int32_t f_zero = 0 | (sa ^ sb) << 31;
-        return *(float *) &f_zero;
+        return f_zero;
     }
     /* multiplication */
     sr = sa ^ sb;
@@ -89,20 +98,18 @@ float fmul32(float a, float b) {
     /* overflow and underflow */
     if(er < 0) {
         int32_t f_zero = 0 | (sa ^ sb) << 31;
-        return *(float *) &f_zero;
+        return f_zero;
     }
     if(er >= 0xFF) {
         int32_t f_inf = 0x7F800000 | (sa ^ sb) << 31;
-        return *(float *) &f_inf;
+        return f_inf;
     }
     /* result */
     result = (sr << 31) | ((er & 0xFF) << 23) | (mr & 0x7FFFFF);
-    return *(float *) &result;
+    return result;
 }
 
-float fadd32(float a, float b) {
-    int32_t ia = *(int32_t *) &a;
-    int32_t ib = *(int32_t *) &b;
+int32_t fadd32(int32_t a, int32_t b) {
     /* define sign */
     int32_t sa = ia >> 31;
     int32_t sb = ib >> 31;
@@ -121,21 +128,21 @@ float fadd32(float a, float b) {
     if(ea == 0xFF) {
         if(ma != 0x800000 || (ia ^ ib) == 0x80000000) {
             int32_t f_nan = 0x7FF80001;
-            return *(float *) &f_nan;
+            return f_nan;
         }
         else {
             int32_t f_inf = 0x7F800000 | sa << 31;
-            return *(float *) &f_inf;
+            return f_inf;
         }
     }
     if(eb == 0xFF) {
         if(mb != 0x800000 || (ia ^ ib) == 0x80000000) {
             int32_t f_nan = 0x7FF80001;
-            return *(float *) &f_nan;
+            return f_nan;
         }
         else {
             int32_t f_inf = 0x7F800000 | sb << 31;
-            return *(float *) &f_inf;
+            return f_inf;
         }
     }
     /* exponent align */
@@ -182,18 +189,16 @@ float fadd32(float a, float b) {
     /* overflow and underflow */
     if(er < 0) {
         int32_t f_zero = sr << 31;
-        return *(float *) &f_zero;
+        return f_zero;
     }
     if(er >= 0xFF) {
         int32_t f_inf = 0x7F800000 | sr << 31;
-        return *(float *) &f_inf;
+        return f_inf;
     }
     /* result */
     result = (sr << 31) | ((er & 0xFF) << 23) | (mr & 0x7FFFFF);
-    return *(float *) &result;
+    return result;
 }
-float retdata[9] = {0}; /* preserve space for malloc replacement */
-matf32_t retmat = {0, 0, 0}; /* preserve space, not initialize */
 matf32_t *matmul(matf32_t *first, matf32_t *second) {
     /* (m * n) * (n * o) -> (m * o) */
     int32_t m = first->row;
@@ -206,10 +211,10 @@ matf32_t *matmul(matf32_t *first, matf32_t *second) {
     ret->row = m;
     ret->col = o;
     ret->data = retdata; /* replace malloc array */
-    float *a = first->data;
-    float *b = second->data;
-    float *c = ret->data;
-    float subtotal;
+    int32_t *a = first->data;
+    int32_t *b = second->data;
+    int32_t *c = ret->data;
+    int32_t subtotal;
     int32_t arow = 0;
     int32_t aidx;
     int32_t bidx;
@@ -231,14 +236,6 @@ matf32_t *matmul(matf32_t *first, matf32_t *second) {
     }
     return ret;
 }
-float aarr[9] = {0.89f, 0.18f, 0.04f,
-			  0.07f, 1.0f, 0.2f,
-			  0.13f, 0.0f, 0.7f};
-float barr[9] = {0.02f, 1.01f, 0.14f,
-			  0.1f, 0.14f, 0.99f,
-			  0.87f, 0.2f, 0.09f};
-matf32_t amat = {.row = 3, .col = 3, .data = aarr};
-matf32_t bmat = {.row = 3, .col = 3, .data = barr};
 int main() {
     /*
     answer should be
@@ -247,10 +244,10 @@ int main() {
     0.6116  0.2713  0.0812
     */
     matf32_t *cmat = matmul(&amat, &bmat);
-    float *c = cmat->data;
+    int32_t *c = cmat->data;
     printf("result:\n");
     for(int i = 0; i < 9; i ++) {
-        printf("%f\n", c[i]);
+        printf("%f\n", *(float *) &c[i]);
     }
 	return 0;
 }
