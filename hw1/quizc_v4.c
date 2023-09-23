@@ -40,46 +40,43 @@ float fmul32(float a, float b) {
     int32_t ia = *(int32_t *) &a;
     int32_t ib = *(int32_t *) &b;
     /* define sign */
-    int32_t sa = ia >> 31;
-    int32_t sb = ib >> 31;
-    int32_t sr;
+    int32_t sr = (ia ^ ib) >> 31;
     /* define mantissa */
-    int32_t ma = (ia & 0x7FFFFF) | 0x800000;
-    int32_t mb = (ib & 0x7FFFFF) | 0x800000;
+    int32_t ma = (ia & 0x7fffff) | 0x800000;
+    int32_t mb = (ib & 0x7fffff) | 0x800000;
     int32_t mr;
     /* define exponent */
-    int32_t ea = ((ia >> 23) & 0xFF);
-    int32_t eb = ((ib >> 23) & 0xFF);
+    int32_t ea = ((ia >> 23) & 0xff);
+    int32_t eb = ((ib >> 23) & 0xff);
     int32_t er;
     /* define result */
     int32_t result;
     /* special values */
-    if(ea == 0xFF) {
+    if(ea == 0xff) {
         if(ma != 0x800000 || eb == 0) {
-            int32_t f_nan = 0x7FF80001;
+            int32_t f_nan = 0x7f800001;
             return *(float *) &f_nan;
         }
         else {
-            int32_t f_inf = 0x7F800000 | (sa ^ sb) << 31;
+            int32_t f_inf = 0x7F800000 | sr << 31;
             return *(float *) &f_inf;
         }
     }
-    if(eb == 0xFF) {
+    if(eb == 0xff) {
         if(mb != 0x800000 || ea == 0) {
-            int32_t f_nan = 0x7FF80001;
+            int32_t f_nan = 0x7f800001;
             return *(float *) &f_nan;
         }
         else {
-            int32_t f_inf = 0x7F800000 | (sa ^ sb) << 31;
+            int32_t f_inf = 0x7F800000 | sr << 31;
             return *(float *) &f_inf;
         }
     }
     if(ea == 0 || eb == 0) {
-        int32_t f_zero = 0 | (sa ^ sb) << 31;
+        int32_t f_zero = 0 | sr << 31;
         return *(float *) &f_zero;
     }
     /* multiplication */
-    sr = sa ^ sb;
     int32_t mrtmp = mmul(ma, mb);
     int32_t ertmp = ea + eb - 127;
     /* realign mantissa */
@@ -87,16 +84,16 @@ float fmul32(float a, float b) {
     mr = mrtmp >> mshift;
     er = ertmp + mshift;
     /* overflow and underflow */
-    if(er < 0) {
-        int32_t f_zero = 0 | (sa ^ sb) << 31;
+    if(er <= 0) {
+        int32_t f_zero = 0 | sr << 31;
         return *(float *) &f_zero;
     }
-    if(er >= 0xFF) {
-        int32_t f_inf = 0x7F800000 | (sa ^ sb) << 31;
+    if(er >= 0xff) {
+        int32_t f_inf = 0x7f800001 | sr << 31;
         return *(float *) &f_inf;
     }
     /* result */
-    result = (sr << 31) | ((er & 0xFF) << 23) | (mr & 0x7FFFFF);
+    result = (sr << 31) | ((er & 0xff) << 23) | (mr & 0x7fffff);
     return *(float *) &result;
 }
 
@@ -108,33 +105,33 @@ float fadd32(float a, float b) {
     int32_t sb = ib >> 31;
     int32_t sr;
     /* define mantissa */
-    int32_t ma = (ia & 0x7FFFFF) | 0x800000;
-    int32_t mb = (ib & 0x7FFFFF) | 0x800000;
+    int32_t ma = (ia & 0x7fffff) | 0x800000;
+    int32_t mb = (ib & 0x7fffff) | 0x800000;
     int32_t mr;
     /* define exponent */
-    int32_t ea = ((ia >> 23) & 0xFF);
-    int32_t eb = ((ib >> 23) & 0xFF);
+    int32_t ea = ((ia >> 23) & 0xff);
+    int32_t eb = ((ib >> 23) & 0xff);
     int32_t er;
     /* define result */
     int32_t result;
     /* special values */
-    if(ea == 0xFF) {
+    if(ea == 0xff) {
         if(ma != 0x800000 || (ia ^ ib) == 0x80000000) {
-            int32_t f_nan = 0x7FF80001;
+            int32_t f_nan = 0x7f800001;
             return *(float *) &f_nan;
         }
         else {
-            int32_t f_inf = 0x7F800000 | sa << 31;
+            int32_t f_inf = 0x7f800000 | sa << 31;
             return *(float *) &f_inf;
         }
     }
-    if(eb == 0xFF) {
+    if(eb == 0xff) {
         if(mb != 0x800000 || (ia ^ ib) == 0x80000000) {
-            int32_t f_nan = 0x7FF80001;
+            int32_t f_nan = 0x7f800001;
             return *(float *) &f_nan;
         }
         else {
-            int32_t f_inf = 0x7F800000 | sb << 31;
+            int32_t f_inf = 0x7f800000 | sb << 31;
             return *(float *) &f_inf;
         }
     }
@@ -165,9 +162,9 @@ float fadd32(float a, float b) {
     }
     else {
         madd = ma - mb;
-        if((madd >> 31) != 0) {
+        if(madd < 0) {
             sr ^= 1;
-            madd = ~madd + 1;
+            madd = 0 - madd;
         }
     }
     /* realign mantissa */
@@ -184,12 +181,12 @@ float fadd32(float a, float b) {
         int32_t f_zero = sr << 31;
         return *(float *) &f_zero;
     }
-    if(er >= 0xFF) {
-        int32_t f_inf = 0x7F800000 | sr << 31;
+    if(er >= 0xff) {
+        int32_t f_inf = 0x7f800000 | sr << 31;
         return *(float *) &f_inf;
     }
     /* result */
-    result = (sr << 31) | ((er & 0xFF) << 23) | (mr & 0x7FFFFF);
+    result = (sr << 31) | ((er & 0xff) << 23) | (mr & 0x7fffff);
     return *(float *) &result;
 }
 float retdata[9] = {0}; /* preserve space for malloc replacement */
@@ -220,7 +217,7 @@ matf32_t *matmul(matf32_t *first, matf32_t *second) {
             aidx = arow;
             bidx = j;
             for(int32_t k = 0; k < n; k ++) {
-                subtotal = fadd32(subtotal, fmul32(a[aidx], b[bidx]));
+                subtotal = fadd32(fmul32(a[aidx], b[bidx]), subtotal);
                 aidx += 1;
                 bidx += o;
             }
@@ -246,10 +243,16 @@ int main() {
     0.2753  0.2507  1.0178
     0.6116  0.2713  0.0812
     */
+    /*
+    in reality it is
+    0.0706  0.9321  0.3064
+    0.2754  0.2507  1.0178
+    0.609   0.14    0.063 
+    */
     matf32_t *cmat = matmul(&amat, &bmat);
     float *c = cmat->data;
     printf("result:\n");
-    for(int i = 0; i < 9; i ++) {
+    for(int32_t i = 0; i < 9; i ++) {
         printf("%f\n", c[i]);
     }
 	return 0;

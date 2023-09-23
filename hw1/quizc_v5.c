@@ -17,9 +17,9 @@ int32_t barr[9] = {0x3ca3d70a, 0x3f8147ae, 0x3e0f5c29,
 matf32_t amat = {.row = 3, .col = 3, .data = aarr};
 matf32_t bmat = {.row = 3, .col = 3, .data = barr};
 int32_t retdata[9] = {0}; /* preserve space for malloc replacement */
-matf32_t retmat = {0, 0, 0}; /* preserve space, not initialize */
+matf32_t retmat = {0, 0, 0}; /* preserve space, but not initialize */
 
-uint32_t highestbit(uint32_t x) {
+uint32_t highestbit(register uint32_t x) {
     x |= (x >> 1);
     x |= (x >> 2);
     x |= (x >> 4);
@@ -27,128 +27,108 @@ uint32_t highestbit(uint32_t x) {
     x |= (x >> 16);
     /* count ones (population count) */
     x -= ((x >> 1) & 0x55555555);
-    x = ((x >> 2) & 0x33333333) + (x & 0x33333333);
+    register int32_t num3333 = 0x33333333;
+    x = ((x >> 2) & num3333) + (x & num3333);
     x = ((x >> 4) + x) & 0x0f0f0f0f;
     x += (x >> 8);
     x += (x >> 16);
     return x & 0x7f;
 }
 /* float32 mantissa multiply */
-int32_t mmul(int32_t a, int32_t b) {
-    int32_t r = 0;
+int32_t mmul(register int32_t a, register int32_t b) {
+    register int32_t r = 0;
     a = a << 1; /* to counter last right shift */
-    while(b != 0) {
+    do {
         if((b & 1) != 0) {
             r = r + a;
         }
         b = b >> 1;
         r = r >> 1;
-    }
+    } while(b != 0);
     return r;
 }
 /* float32 multiply */
 int32_t fmul32(int32_t ia, int32_t ib) {
     /* define sign */
-    int32_t sa = ia >> 31;
-    int32_t sb = ib >> 31;
-    int32_t sr;
+    int32_t sr = (ia ^ ib) >> 31;
     /* define mantissa */
-    int32_t ma = (ia & 0x7FFFFF) | 0x800000;
-    int32_t mb = (ib & 0x7FFFFF) | 0x800000;
+    int32_t ma = (ia & 0x7fffff) | 0x800000;
+    int32_t mb = (ib & 0x7fffff) | 0x800000;
     int32_t mr;
     /* define exponent */
-    int32_t ea = ((ia >> 23) & 0xFF);
-    int32_t eb = ((ib >> 23) & 0xFF);
+    int32_t ea = ((ia >> 23) & 0xff);
+    int32_t eb = ((ib >> 23) & 0xff);
     int32_t er;
-    /* define result */
-    int32_t result;
     /* special values */
-    if(ea == 0xFF) {
-        if(ma != 0x800000 || eb == 0) {
-            int32_t f_nan = 0x7FF80001;
-            return f_nan;
+    if(ea == 0xff) {
+        if(ma == 0x800000 && eb != 0) {
+            return 0x7f800000 | sr << 31;
         }
-        else {
-            int32_t f_inf = 0x7F800000 | (sa ^ sb) << 31;
-            return f_inf;
-        }
+        return 0x7f800001;
     }
-    if(eb == 0xFF) {
-        if(mb != 0x800000 || ea == 0) {
-            int32_t f_nan = 0x7FF80001;
-            return f_nan;
+    if(eb == 0xff) {
+        if(mb == 0x800000 && ea != 0) {
+            return 0x7f800000 | sr << 31;
         }
-        else {
-            int32_t f_inf = 0x7F800000 | (sa ^ sb) << 31;
-            return f_inf;
-        }
+        return 0x7f800001;
     }
-    if(ea == 0 || eb == 0) {
-        int32_t f_zero = 0 | (sa ^ sb) << 31;
-        return f_zero;
+    if(ea == 0) {
+        return sr << 31;
+    }
+    if(eb == 0) {
+        return sr << 31;
     }
     /* multiplication */
-    sr = sa ^ sb;
-    int32_t mrtmp = mmul(ma, mb);
-    int32_t ertmp = ea + eb - 127;
+    register int32_t mrtmp = mmul(ma, mb);
+    register int32_t ertmp = ea + eb - 127;
     /* realign mantissa */
-    int32_t mshift = (mrtmp >> 24) & 1;
+    register int32_t mshift = (mrtmp >> 24) & 1;
     mr = mrtmp >> mshift;
     er = ertmp + mshift;
     /* overflow and underflow */
-    if(er < 0) {
-        int32_t f_zero = 0 | (sa ^ sb) << 31;
-        return f_zero;
+    if(er <= 0) {
+        return sr << 31;
     }
-    if(er >= 0xFF) {
-        int32_t f_inf = 0x7F800000 | (sa ^ sb) << 31;
-        return f_inf;
+    if(er >= 0xff) {
+        return 0x7f800000 | sr << 31;
     }
     /* result */
-    result = (sr << 31) | ((er & 0xFF) << 23) | (mr & 0x7FFFFF);
-    return result;
+    return (sr << 31) | ((er & 0xff) << 23) | (mr & 0x7fffff);
 }
 
-int32_t fadd32(int32_t a, int32_t b) {
+int32_t fadd32(int32_t ia, int32_t ib) {
     /* define sign */
     int32_t sa = ia >> 31;
     int32_t sb = ib >> 31;
     int32_t sr;
     /* define mantissa */
-    int32_t ma = (ia & 0x7FFFFF) | 0x800000;
-    int32_t mb = (ib & 0x7FFFFF) | 0x800000;
+    int32_t ma = (ia & 0x7fffff) | 0x800000;
+    int32_t mb = (ib & 0x7fffff) | 0x800000;
     int32_t mr;
     /* define exponent */
-    int32_t ea = ((ia >> 23) & 0xFF);
-    int32_t eb = ((ib >> 23) & 0xFF);
+    int32_t ea = ((ia >> 23) & 0xff);
+    int32_t eb = ((ib >> 23) & 0xff);
     int32_t er;
-    /* define result */
-    int32_t result;
+    /* other variables*/
+    int32_t madd;
     /* special values */
-    if(ea == 0xFF) {
-        if(ma != 0x800000 || (ia ^ ib) == 0x80000000) {
-            int32_t f_nan = 0x7FF80001;
-            return f_nan;
+    if(ea == 0xff) {
+        if(ma == 0x800000 && (ia ^ ib) != 0x80000000) {
+            return 0x7f800000 | sa << 31;
         }
-        else {
-            int32_t f_inf = 0x7F800000 | sa << 31;
-            return f_inf;
-        }
+        return 0x7f800001;
     }
-    if(eb == 0xFF) {
-        if(mb != 0x800000 || (ia ^ ib) == 0x80000000) {
-            int32_t f_nan = 0x7FF80001;
-            return f_nan;
+    if(eb == 0xff) {
+        if(mb == 0x800000 && (ia ^ ib) != 0x80000000) {
+            return 0x7f800000 | sb << 31;
         }
-        else {
-            int32_t f_inf = 0x7F800000 | sb << 31;
-            return f_inf;
-        }
+        return 0x7f800001;
     }
     /* exponent align */
     if(ea >= eb) {
-        if(ea - eb <= 24) {
-            mb = mb >> (ea - eb);
+        register int32_t eab = ea - eb;
+        if(eab <= 24) {
+            mb = mb >> eab;
         }
         else {
             mb = 0;
@@ -156,8 +136,9 @@ int32_t fadd32(int32_t a, int32_t b) {
         er = ea;
     }
     else {
-        if(eb - ea <= 24) {
-            ma = ma >> (eb - ea);
+        register int32_t eab = eb - ea;
+        if(eab <= 24) {
+            ma = ma >> eab;
         }
         else {
             ma = 0;
@@ -166,38 +147,34 @@ int32_t fadd32(int32_t a, int32_t b) {
     }
     /* addition or substraction */
     sr = sa;
-    int32_t madd;
     if((sa ^ sb) == 0) {
         madd = ma + mb;
     }
     else {
         madd = ma - mb;
-        if((madd >> 31) != 0) {
+        if(madd < 0) {
             sr ^= 1;
-            madd = ~madd + 1;
+            madd = 0 - madd;
         }
     }
     /* realign mantissa */
-    int32_t digits = highestbit(madd);
+    register int32_t digits = highestbit(madd);
     if(digits == 25) {
         mr = (madd + 1) >> 1;
     }
     else {
         mr = madd << (24 - digits);
     }
-    er = er - (24 - digits);
+    er = er - 24 + digits;
     /* overflow and underflow */
     if(er < 0) {
-        int32_t f_zero = sr << 31;
-        return f_zero;
+        return sr << 31;
     }
-    if(er >= 0xFF) {
-        int32_t f_inf = 0x7F800000 | sr << 31;
-        return f_inf;
+    if(er >= 0xff) {
+        return 0x7f800000 | sr << 31;
     }
     /* result */
-    result = (sr << 31) | ((er & 0xFF) << 23) | (mr & 0x7FFFFF);
-    return result;
+    return (sr << 31) | ((er & 0xff) << 23) | (mr & 0x7fffff);
 }
 matf32_t *matmul(matf32_t *first, matf32_t *second) {
     /* (m * n) * (n * o) -> (m * o) */
@@ -216,25 +193,36 @@ matf32_t *matmul(matf32_t *first, matf32_t *second) {
     int32_t *c = ret->data;
     int32_t subtotal;
     int32_t arow = 0;
-    int32_t aidx;
-    int32_t bidx;
-    int32_t cidx = 0;
-    for(int32_t i = 0; i < m; i ++) {
-        for(int32_t j = 0; j < o; j ++) {
+    int32_t aidx = 0;
+    int32_t bidx = 0;
+    int32_t *cptr = c;
+    int32_t i = 0;
+    int32_t j = 0;
+    int32_t k = 0;
+    while(i < m) {
+        j = 0;
+        while(j < o) {
             subtotal = 0;
             aidx = arow;
             bidx = j;
-            for(int32_t k = 0; k < n; k ++) {
-                subtotal = fadd32(subtotal, fmul32(a[aidx], b[bidx]));
+            k = 0;
+            while(k < n) {
+                subtotal = fadd32(fmul32(a[aidx], b[bidx]), subtotal);
                 aidx += 1;
                 bidx += o;
+                k ++;
             }
-            c[cidx] = subtotal;
-            cidx += 1;
+            *(cptr) = subtotal;
+            cptr += 1; // actually + 4
+            j ++;
         }
         arow += n;
+        i ++;
     }
     return ret;
+}
+static inline float bitof(int a) {
+    return *(float *) &a;
 }
 int main() {
     /*
@@ -246,8 +234,11 @@ int main() {
     matf32_t *cmat = matmul(&amat, &bmat);
     int32_t *c = cmat->data;
     printf("result:\n");
-    for(int i = 0; i < 9; i ++) {
-        printf("%f\n", *(float *) &c[i]);
-    }
+    int32_t i = 0;
+    do {
+        printf("%f", bitof(c[i]));
+        printf("\n");
+        i ++;
+    } while(i < 9);
 	return 0;
 }
