@@ -243,12 +243,6 @@ int main() {
     0.2753  0.2507  1.0178
     0.6116  0.2713  0.0812
     */
-    /*
-    in reality it is
-    0.0706  0.9321  0.3064
-    0.2754  0.2507  1.0178
-    0.609   0.14    0.063 
-    */
     matf32_t *cmat = matmul(&amat, &bmat);
     float *c = cmat->data;
     printf("result:\n");
