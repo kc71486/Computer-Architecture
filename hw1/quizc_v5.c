@@ -221,8 +221,18 @@ matf32_t *matmul(matf32_t *first, matf32_t *second) {
     }
     return ret;
 }
-static inline float bitof(int a) {
-    return *(float *) &a;
+static inline void printstr(const char *str) {
+    asm("li  a7, 4");
+    asm("ecall");
+}
+static inline void printline() {
+    asm("li  a0, 10");
+    asm("li  a7, 11");
+    asm("ecall");
+}
+static inline void printfloat(int a) {
+    asm("li  a7, 2");
+    asm("ecall");
 }
 int main() {
     /*
@@ -233,11 +243,11 @@ int main() {
     */
     matf32_t *cmat = matmul(&amat, &bmat);
     int32_t *c = cmat->data;
-    printf("result:\n");
+    printstr("result:\n");
     int32_t i = 0;
     do {
-        printf("%f", bitof(c[i]));
-        printf("\n");
+        printfloat(c[i]);
+        printline();
         i ++;
     } while(i < 9);
 	return 0;

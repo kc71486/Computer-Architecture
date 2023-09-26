@@ -236,6 +236,19 @@ float barr[9] = {0.02f, 1.01f, 0.14f,
 			  0.87f, 0.2f, 0.09f};
 matf32_t amat = {.row = 3, .col = 3, .data = aarr};
 matf32_t bmat = {.row = 3, .col = 3, .data = barr};
+static inline void printstr(const char *str) {
+    asm("li  a7, 4");
+    asm("ecall");
+}
+static inline void printline() {
+    asm("li  a0, 10");
+    asm("li  a7, 11");
+    asm("ecall");
+}
+static inline void printfloat(int a) {
+    asm("li  a7, 2");
+    asm("ecall");
+}
 int main() {
     /*
     answer should be
@@ -244,10 +257,13 @@ int main() {
     0.6116  0.2713  0.0812
     */
     matf32_t *cmat = matmul(&amat, &bmat);
-    float *c = cmat->data;
-    printf("result:\n");
-    for(int32_t i = 0; i < 9; i ++) {
-        printf("%f\n", c[i]);
-    }
+    int32_t *c = cmat->data;
+    printstr("result:\n");
+    int32_t i = 0;
+    do {
+        printfloat(c[i]);
+        printline();
+        i ++;
+    } while(i < 9);
 	return 0;
 }
