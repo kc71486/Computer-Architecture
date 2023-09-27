@@ -20,7 +20,7 @@ matf32_t bmat = {.row = 3, .col = 3, .data = barr};
 /* bss */
 int32_t retdata[9] = {0};
 matf32_t retmat = {0, 0, 0};
-uint32_t highestbit(register uint32_t x) {
+static uint32_t highestbit(register uint32_t x) {
     x |= (x >> 1);
     x |= (x >> 2);
     x |= (x >> 4);
@@ -36,7 +36,7 @@ uint32_t highestbit(register uint32_t x) {
     return x & 0x7f;
 }
 /* float32 mantissa multiply */
-int32_t mmul(register int32_t a, register int32_t b) {
+static int32_t mmul(register int32_t a, register int32_t b) {
     register int32_t r = 0;
     a = a << 1; /* to counter last right shift */
     do {
@@ -57,7 +57,9 @@ int32_t mmul(register int32_t a, register int32_t b) {
 /* 680, (11150, 8060), (1663, 31, 5), (9809, 1342, 0) */
 /* after improve matmul*/
 /* 5d0, (10381, 7538), (1663, 37, 10), (9127, 1255, 0) */
-int32_t fmul32(int32_t ia, int32_t ib) {
+/* after improve matmul again*/
+/* 5b8, (10228, 7384), (1088, 29, 6), (8916, 1313, 0) */
+static int32_t fmul32(int32_t ia, int32_t ib) {
     /*define const*/
     register int s0 = 0x7fffff;
     register int s1 = 0x800000;
@@ -115,7 +117,7 @@ int32_t fmul32(int32_t ia, int32_t ib) {
     /* result */
     return sr | ((ear & s2) << 23) | (mar & s0);
 }
-int32_t fadd32(int32_t ia, int32_t ib) {
+static int32_t fadd32(int32_t ia, int32_t ib) {
     /*define const*/
     register int s0 = 0x7fffff;
     register int s1 = 0x800000;
@@ -198,7 +200,7 @@ int32_t fadd32(int32_t ia, int32_t ib) {
     /* result */
     return sr | ((ear & 0xff) << 23) | (mar & 0x7fffff);
 }
-matf32_t *matmul(matf32_t *first, matf32_t *second) {
+static matf32_t *matmul(matf32_t *first, matf32_t *second) {
     /* (m * n) * (n * o) -> (m * o) */
     register int32_t m = first->row; /*s0*/
     register int32_t n = first->col; /*s1*/
@@ -220,14 +222,12 @@ matf32_t *matmul(matf32_t *first, matf32_t *second) {
     ret->col = o;
     ret->data = retdata;
     register int32_t *astart = first->data; /*s3*/
-    register int32_t *cstart = ret->data; /*s4*/
+    int32_t * const cstart = ret->data; /*(sp+60)*/
     register int32_t *aptr = astart; /*s5*/
     register int32_t *bptr = second->data; /*s6*/
     register int32_t *cptr = cstart; /*s7*/
     register int32_t *brow = bptr; /*s8*/
-    register int32_t i = 0; /*s9*/
-    register int32_t j = 0; /*s10*/
-    register int32_t k = 0; /*s11*/
+    register int32_t i, j = 0, k; /*i=s9,  j=s10,  k=s11*/
     m <<= 2;
     n <<= 2;
     o <<= 2;
@@ -237,9 +237,10 @@ matf32_t *matmul(matf32_t *first, matf32_t *second) {
         i = 0;
         do {
             bptr = brow;
+            register int32_t aval = *aptr; /*s4*/
             k = 0;
             do {
-                *cptr = fadd32(fmul32(*aptr, *bptr), *cptr);
+                *cptr = fadd32(fmul32(aval, *bptr), *cptr);
                 bptr += 1; /*bptr += 4*/
                 cptr += 1; /*cptr += 4*/
                 k += 4;
@@ -251,6 +252,59 @@ matf32_t *matmul(matf32_t *first, matf32_t *second) {
         j += 4;
     } while(j < n);
     
+    return ret;
+}
+/*not using this*/
+static matf32_t *matmul_alt(matf32_t *first, matf32_t *second) {
+    /* (m * n) * (n * o) -> (m * o) */
+    register int32_t m = first->row; /*s0*/
+    register int32_t n = first->col; /*s1*/
+    register int32_t o = second->col; /*s2*/
+    if(n != second->row) {
+        return NULL;
+    }
+    matf32_t *ret = &retmat; /*temporary t3, main (sp+56)*/
+    if(m <= 0) {
+        return ret;
+    }
+    if(n <= 0) {
+        return ret;
+    }
+    if(o <= 0) {
+        return ret;
+    }
+    ret->row = m;
+    ret->col = o;
+    ret->data = retdata; /* replace malloc array */
+    register int32_t *bstart = second->data;  /*s3*/
+    register int32_t *aptr = first->data; /*s5*/
+    register int32_t *bptr = bstart; /*s6*/
+    register int32_t *cptr = ret->data; /*s7*/
+    register int32_t *arow = aptr; /*s8*/
+    register int32_t i = 0, j, k; /*i=s9,  j=s10,  k=s11*/
+    m <<= 2;
+    n <<= 2;
+    o <<= 2;
+    do {
+        j = 0;
+        do {
+            register int32_t subtotal = 0; /*s4*/
+            aptr = arow;
+            bptr = bstart + (j >> 2); /*bptr = bstart + j*/
+            k = 0;
+            do {
+                subtotal = fadd32(fmul32(*aptr, *bptr), subtotal);
+                aptr += 1; /*aptr += 4*/
+                bptr += (o >> 2); /*bptr += o*/
+                k += 4;
+            } while(k < n);
+            *(cptr) = subtotal;
+            cptr += 1; /*cptr += 4*/
+            j += 4;
+        } while(j < o);
+        arow += (n >> 2); /*arow += n*/
+        i += 4;
+    } while(i < m);
     return ret;
 }
 static inline void printstr(const char *str) {

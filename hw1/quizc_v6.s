@@ -289,7 +289,7 @@ fadd32:
     addi     sp,  sp,  48      # free stack
     jr       ra
 matmul:
-    addi     sp,  sp,  -64     # allocate stack
+    addi     sp,  sp,  -68     # allocate stack
     sw       ra,  0(sp)        # save registers
     sw       s0,  4(sp)
     sw       s1,  8(sp)
@@ -323,39 +323,33 @@ matmul:
     la       t0,  retdata
     sw       t0,  8(t3)        # ret->data = retdata
     lw       s3,  8(a0)        # astart = #s3
-    lw       s4,  8(t3)        # cstart = #s4
+    lw       t0,  8(t3)
+    sw       t0,  60(sp)       # cstart = (sp+60)
     mv       s5,  s3           # aptr = #s5
     lw       s6,  8(a1)        # bptr = #s6
     mv       s7,  s4           # cptr = #s7
     mv       s8,  s6           # brow = #s8
-    li       s9,  0            # i = #s9
-    li       s10, 0            # j = #s10
-    li       s11, 0            # k = #s11
+    li       s10, 0            # i = #s9,  j = #s10,  k = #s11
     slli     s0,  s0,  2       # m <<= 2
     slli     s1,  s1,  2       # n <<= 2
     slli     s2,  s2,  2       # o <<= 2
     matjs:
     add      s5,  s3,  s10     # aptr = astart + j
-    mv       s7,  s4           # cptr = cstart
+    lw       s7,  60(sp)       # cptr = cstart
     li       s9,  0            # i = 0
     matis:
     mv       s6,  s8           # bptr = brow
+    lw       s4,  0(s5)        # aval = *aptr
     li       s11, 0            # k = 0
     matks:
-    lw       a0,  0(s5)
     lw       a1,  0(s6)
+    mv       a0,  s4
     call     fmul32
     lw       a1,  0(s7)
     call     fadd32
-    sw       a0,  0(s7)        # *cptr = fadd32(fmul32(*aptr, *bptr), *cptr)
+    sw       a0,  0(s7)        # *cptr = fadd32(fmul32(aval, *bptr), *cptr)
     addi     s6,  s6,  4       # bptr += 4
     addi     s7,  s7,  4       # cptr += 4
-    mv       a0,  s10
-    li       a7,  1
-    mv       a0,  s9
-    li       a7,  1
-    mv       a0,  s11
-    li       a7,  1
     addi     s11, s11, 4       # k += 4
     blt      s11, s2,  matks   # loop if k < o
     add      s5,  s5,  s2      # aptr += o
@@ -379,7 +373,7 @@ matmul:
     lw       s9,  40(sp)
     lw       s10, 44(sp)
     lw       s11, 48(sp)
-    addi     sp,  sp,  64      # free stack
+    addi     sp,  sp,  68      # free stack
     jr       ra
 main:
     addi     sp,  sp,  -4      # allocate stack
