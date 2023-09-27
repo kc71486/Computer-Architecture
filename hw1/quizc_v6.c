@@ -49,9 +49,9 @@ static int32_t mmul(register int32_t a, register int32_t b) {
     return r;
 }
 /* float32 multiply */
-/* after mofify fadd32 */
+/* after modify fadd32 */
 /* 6f0, (12074, 8903), (2526, 35, 5), (10441, 1634, 0) */
-/* after mofify fmul32 */
+/* after modify fmul32 */
 /* 644, (11204, 8114), (1690, 31, 5), (9775, 1430, 0) */
 /* after special case bugfix*/
 /* 680, (11150, 8060), (1663, 31, 5), (9809, 1342, 0) */
@@ -111,7 +111,7 @@ static int32_t fmul32(int32_t ia, int32_t ib) {
     if(ear <= 0) {
         return sr;
     }
-    if(ear >= 0xff) {
+    if(ear >= s2) {
         return 0x7f800000 | sr;
     }
     /* result */
@@ -133,11 +133,11 @@ static int32_t fadd32(int32_t ia, int32_t ib) {
     register int32_t ear = ((ia >> 23) & 0xff); /*s8, ea and er*/
     register int32_t eb = ((ib >> 23) & 0xff); /*s9*/
     /* special values */
-    if(ear == 0xff) {
+    if(ear == s2) {
         if(mar != 0x800000) {
             return 0x7f800001; /* a is nan*/
         }
-        if(eb = 0xff) {
+        if(eb = s2) {
             if(mb != 0x800000) {
                 return 0x7f800001; /* b is nan*/
             }
@@ -147,7 +147,7 @@ static int32_t fadd32(int32_t ia, int32_t ib) {
         }
         return 0x7f800000 | sa;
     }
-    if(eb == 0xff) {
+    if(eb == s2) {
         if(mb != 0x800000) {
             return 0x7f800001; /* b is nan*/
         }
@@ -194,11 +194,11 @@ static int32_t fadd32(int32_t ia, int32_t ib) {
     if(ear < 0) {
         return sr;
     }
-    if(ear >= 0xff) {
+    if(ear >= s2) {
         return 0x7f800000 | sr;
     }
     /* result */
-    return sr | ((ear & 0xff) << 23) | (mar & 0x7fffff);
+    return sr | ((ear & 0xff) << 23) | (mar & s0);
 }
 static matf32_t *matmul(matf32_t *first, matf32_t *second) {
     /* (m * n) * (n * o) -> (m * o) */
