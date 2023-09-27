@@ -1,4 +1,3 @@
-.rodata
 .data
     resstr:  .string  "result=\n"
     .align 4
@@ -188,16 +187,16 @@ fadd32:
     li       a0,  0x7f800001   # return nan
     j        fadd32ret
     addsman:
-    bne      s9,  s2,  addsab  # skip if eb != 0xff
-    beq      s7,  s1,  addsabm # skip if mb == 0x800000
+    bne      s9,  s2,  addseabn # skip if eb != 0xff
+    beq      s7,  s1,  addsabmn # skip if mb == 0x800000
     li       a0,  0x7f800001   # return nan
     j        fadd32ret
-    addsabm:
+    addsabmn:
     xor      t0,  a0,  a1
-    beq      t0,  x0,  addsab  # skip if (ia ^ ib) == 0
+    beq      t0,  x0,  addseabn # skip if (ia ^ ib) == 0
     li       a0,  0x7f800001   # return nan
     j        fadd32ret
-    addsab:
+    addseabn:
     li       t0,  0x7f800000
     or       a0,  t0,  s3      # return 0x7f800000 | sb
     j        fadd32ret
