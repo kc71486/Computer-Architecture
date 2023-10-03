@@ -45,12 +45,25 @@ highestbit:
 mmul:
     li       t0,  0            # r = #t0
     slli     a0,  a0,  1
+    mmulls:
     andi     t1,  a1,  1
     beq      t1,  x0,  +8      # skip add if (b & 1) == 0
     add      t0,  t0,  a0
-    srli     a1,  a1,  1
     srli     t0,  t0,  1
-    bne      a1,  x0,  -20     # loop back if b != 0
+    andi     t1,  a1,  2
+    beq      t1,  x0,  +8      # skip add if (b & 1) == 0
+    add      t0,  t0,  a0
+    srli     t0,  t0,  1
+    andi     t1,  a1,  4
+    beq      t1,  x0,  +8      # skip add if (b & 1) == 0
+    add      t0,  t0,  a0
+    srli     t0,  t0,  1
+    andi     t1,  a1,  8
+    beq      t1,  x0,  +8      # skip add if (b & 1) == 0
+    add      t0,  t0,  a0
+    srli     a1,  a1,  4
+    srli     t0,  t0,  1
+    bne      a1,  x0,  mmulls  # loop back if b != 0
     mv       a0,  t0
     jr       ra
 fmul32:

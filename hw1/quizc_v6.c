@@ -43,12 +43,23 @@ static int32_t mmul(register int32_t a, register int32_t b) {
         if((b & 1) != 0) {
             r = r + a;
         }
-        b = b >> 1;
+        r = r >> 1;
+        if((b & 2) != 0) {
+            r = r + a;
+        }
+        r = r >> 1;
+        if((b & 4) != 0) {
+            r = r + a;
+        }
+        r = r >> 1;
+        if((b & 8) != 0) {
+            r = r + a;
+        }
+        b = b >> 4;
         r = r >> 1;
     } while(b != 0);
     return r;
 }
-/* float32 multiply */
 /* after modify fadd32 */
 /* 6f0, (12074, 8903), (2526, 35, 5), (10441, 1634, 0) */
 /* after modify fmul32 */
@@ -59,6 +70,9 @@ static int32_t mmul(register int32_t a, register int32_t b) {
 /* 5d0, (10381, 7538), (1663, 37, 10), (9127, 1255, 0) */
 /* after improve matmul again*/
 /* 5b8, (10228, 7384), (1088, 29, 6), (8916, 1313, 0) */
+/* after mmul loop unroll*/
+/* 610, (8500, 6520), (1088, 29, 6), (7215, 1286, 0) */
+/* float32 multiply */
 static int32_t fmul32(int32_t ia, int32_t ib) {
     /*define const*/
     register int s0 = 0x7fffff;
