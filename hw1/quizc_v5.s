@@ -1,5 +1,5 @@
 .data
-    resstr:  .string  "result=\n"
+    resstr:  .string  "first result:\n"
     .align 4
     aarr:    .word    0x3f63d70a, 0x3e3851ec, 0x3d23d70a, 0x3d8f5c29, 0x3f800000, 0x3e4ccccd, 0x3e051eb8, 0x00000000, 0x3f333333
     amat:    .word    3, 3, aarr
@@ -506,6 +506,35 @@ matmul:
     lw       s11, 48(sp)
     addi     sp,  sp,  132     # free stack
     jr       ra
+printmatrix:
+    lw       t0,  0(a0)
+    lw       t1,  4(a0)
+    bne      t0,  x0,  +8
+    jr       ra
+    bne      t1,  x0,  +8
+    jr       ra
+    lw       t2,  8(a0)
+    li       t3,  0
+    li       t4,  0
+    printis:
+    li       t5,  0
+    printjs:
+    add      a1,  t2,  t4
+    lw       a0,  0(a1)
+    li       a7,  2
+    ecall
+    li       a0,  32
+    li       a7,  11
+    ecall
+    addi     t5,  t5,  1
+    addi     t4,  t4,  4
+    blt      t5,  t1,  printjs
+    li       a0,  10
+    li       a7,  11
+    ecall
+    addi     t3,  t3,  1
+    blt      t3,  t0,  printis
+    jr       ra
 main:
     addi     sp,  sp,  -1000   # allocate stack
     sw       ra,  0(sp)        # save registers
@@ -524,23 +553,14 @@ main:
     
     la       a0,  amat
     la       a1,  bmat
-    call     matmul            # cmat = matmul(amat, bmat)
-    lw       t0,  8(a0)        # t0 = cmat->data
+    call     matmul            # a0 = matmul(amat, bmat)
+    mv       s2,  a0           # s2 = a0
     lw       a0,  resstr
     addi     a7,  x0,  4       # print "result=\n"
     ecall
-    li       t1,  0            # t1 = i
-    li       t2,  9            # t2 = 9
     printl:
-    lw       a0,  0(t0)
-    addi     a7,  x0,  2       # print aarr[i]
-	ecall
-    li       a0,  10
-    addi     a7,  x0,  11      # print '\n'
-	ecall
-    addi     t0,  t0,  4
-    addi     t1,  t1,  1
-    blt      t1,  t2,  printl  # loop while i < 9
+    mv       a0,  s2
+    call     printmatrix
     lw       ra,  0(sp)        # restore registers
     lw       s0,  4(sp)
     lw       s1,  8(sp)
