@@ -222,6 +222,10 @@ static int32_t *new_arr(int32_t size) {
     register char *ptr = (char *) heap_top; /* for exact pointer calculation */
     size = size << 2;
     heap_top = ptr + size;
+    register char *cur = heap_top;
+    while(cur < heap_top) {
+        (*cur) = 0;
+    }
     return (int32_t *) ptr;
 }
 /* integer multiply */

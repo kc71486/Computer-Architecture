@@ -365,6 +365,9 @@ fadd32:
     lw       s11, 48(sp)
     addi     sp,  sp,  120     # free stack
     jr       ra
+new_mat:
+new_arr:
+imul32:
 matmul:
     addi     sp,  sp,  -132    # allocate stack
     sw       ra,  0(sp)        # save registers
