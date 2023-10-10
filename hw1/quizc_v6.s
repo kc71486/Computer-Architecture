@@ -5,7 +5,7 @@
     amat:    .word    3, 3, aarr
     barr:    .word    0x3ca3d70a, 0x3f8147ae, 0x3e0f5c29, 0x3dcccccd, 0x3e0f5c29, 0x3f7d70a4, 0x3f5eb852, 0x3e4ccccd, 0x3db851ec
     bmat:    .word    3, 3, barr
-    heap_top:     .word     0x11000000
+    heap_top:.word    0x123597af   # non zero random number so it will not appear in bss and mess with the compiler
 .bss
     heapbuf1:.dword   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     heapbuf2:.dword   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -447,6 +447,9 @@ main:
     sw       s0,  4(sp)
     sw       s1,  8(sp)
     sw       s2,  12(sp)
+    la       t0,  heapbuf1
+    la       t1,  heap_top
+    sw       t0,  0(t1)        # heap_top = heapbuf1
     la       a0,  resstr
     addi     a7,  x0,  4       # print "first result:\n"
     ecall

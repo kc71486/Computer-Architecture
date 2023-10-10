@@ -17,9 +17,9 @@ int32_t barr[9] = {0x3ca3d70a, 0x3f8147ae, 0x3e0f5c29,
 			  0x3f5eb852, 0x3e4ccccd, 0x3db851ec};
 matf32_t amat = {.row = 3, .col = 3, .data = aarr};
 matf32_t bmat = {.row = 3, .col = 3, .data = barr};
-char * heap_top = (char *)0x11000000; /* heap top for hand written calloc */
+char * heap_top = (char *)0x123597af; /* non zero random number so it will not appear in bss and mess with the compiler */
 /* bss */
-char heapbuf[1024] = {0};
+char heapbuf[1024] = {0}; /*heap_top should point to this place*/
 static uint32_t highestbit(register uint32_t x) {
     x |= (x >> 1);
     x |= (x >> 2);
@@ -340,6 +340,7 @@ int main() {
     0.2753  0.2507  1.0178
     0.6116  0.2713  0.0812
     */
+    heap_top = heapbuf;
     printstr("first result:\n");
     matf32_t *cmat = matmul(&amat, &bmat);
     printmatrix(cmat);
