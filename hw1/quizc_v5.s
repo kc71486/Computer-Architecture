@@ -8,7 +8,7 @@
     heap_top:     .word     0x11000000
 .bss
     retdata: .word    0, 0, 0, 0, 0, 0, 0, 0, 0
-    retmat:  .word    0, 0, 0  # matf32_t  
+    retmat:  .word    0, 0, 0  # matf32_t
 .text
 
 start:
