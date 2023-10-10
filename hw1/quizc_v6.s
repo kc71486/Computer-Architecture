@@ -1,16 +1,27 @@
 .data
-    resstr:  .string  "first result:\n"
+    resstr1: .string  "first result:\n"
     .align 4
-    aarr:    .word    0x3f63d70a, 0x3e3851ec, 0x3d23d70a, 0x3d8f5c29, 0x3f800000, 0x3e4ccccd, 0x3e051eb8, 0x00000000, 0x3f333333
-    amat:    .word    3, 3, aarr
-    barr:    .word    0x3ca3d70a, 0x3f8147ae, 0x3e0f5c29, 0x3dcccccd, 0x3e0f5c29, 0x3f7d70a4, 0x3f5eb852, 0x3e4ccccd, 0x3db851ec
-    bmat:    .word    3, 3, barr
+    resstr2: .string  "second result:\n"
+    .align 4
+    resstr3: .string  "third result:\n"
+    .align 4
+    aarr1:   .word    0x3f63d70a, 0x3e3851ec, 0x3d23d70a, 0x3d8f5c29, 0x3f800000, 0x3e4ccccd, 0x3e051eb8, 0x00000000, 0x3f333333
+    amat1:   .word    3, 3, aarr1
+    barr1:   .word    0x3ca3d70a, 0x3f8147ae, 0x3e0f5c29, 0x3dcccccd, 0x3e0f5c29, 0x3f7d70a4, 0x3f5eb852, 0x3e4ccccd, 0x3db851ec
+    bmat1:   .word    3, 3, barr1
+    
+    aarr2:   .word    0x404ccccd, 0x3f8ccccd, 0x3fa66666, 0x3fcccccd, 0x3fb33333, 0x40133333
+    amat2:   .word    2, 3, aarr2
+    barr2:   .word    0x3f8ccccd, 0x3e9eb852, 0x3de147ae, 0x3e570a3d, 0x3f000000, 0x40066666, 0x3db851ec, 0x3ed70a3d, 0x3e99999a, 0x3e2e147b, 0x3fc8f5c3, 0x3e800000
+    bmat2:   .word    3, 4, barr2
+    
+    aarr3:   .word    0x3f63d70a, 0x3e3851ec, 0x3d23d70a, 0x3d8f5c29, 0x3f800000, 0x3e4ccccd, 0x3e051eb8, 0x00000000, 0x3f333333
+    amat3:   .word    3, 3, aarr3
+    barr3:   .word    0x3e0f5c29, 0x3e0f5c29, 0x3f5eb852
+    bmat3:   .word    3, 1, barr3
     heap_top:.word    0x123597af   # non zero random number so it will not appear in bss and mess with the compiler
 .bss
-    heapbuf1:.dword   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-    heapbuf2:.dword   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-    heapbuf3:.dword   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-    heapbuf4:.dword   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+    bss_end: .word    0  
 .text
 start:
     j        main              # start from main
@@ -330,8 +341,8 @@ matmul:
     lw       s6,  8(a1)        # bptr = #s6
     mv       s8,  s6           # brow = #s8
     # inline new_mat start (a0) -> (t3)
-    la       t5,  heap_top
-    lw       t4,  0(t5)
+    la       t5,  heap_top     # t5 = heap_top
+    lw       t4,  0(t5)        # t4 = *heap_top
     mv       t3,  t4
     addi     t4,  t4,  12
     sw       t4,  0(t5)
@@ -361,6 +372,10 @@ matmul:
     mv       t2,  t4
     add      t4,  t4,  t1
     sw       t4,  0(t5)
+    mv       t0,  t2
+    sw       x0,  0(t0)
+    addi     t0,  t0,  4
+    blt      t0,  t4,  -8
     # inline new_arr end
     sw       t2,  8(t3)        # ret->data = retdata = heap_top = (temp #t2)
     sw       t2,  60(sp)       # cstart = (sp+60)
@@ -447,14 +462,35 @@ main:
     sw       s0,  4(sp)
     sw       s1,  8(sp)
     sw       s2,  12(sp)
-    la       t0,  heapbuf1
+    la       t0,  bss_end
     la       t1,  heap_top
-    sw       t0,  0(t1)        # heap_top = heapbuf1
-    la       a0,  resstr
+    addi     t0,  t0,  4
+    sw       t0,  0(t1)        # heap_top = bss_end + 4 = heap_start
+    la       a0,  resstr1
     addi     a7,  x0,  4       # print "first result:\n"
     ecall
-    la       a0,  amat
-    la       a1,  bmat
+    la       a0,  amat1
+    la       a1,  bmat1
+    call     matmul            # a0 = matmul(amat, bmat)
+    mv       s0,  a0           # s0 = a0
+    ecall
+    mv       a0,  s0
+    call     printmatrix
+    la       a0,  resstr2
+    addi     a7,  x0,  4       # print "second result:\n"
+    ecall
+    la       a0,  amat2
+    la       a1,  bmat2
+    call     matmul            # a0 = matmul(amat, bmat)
+    mv       s0,  a0           # s0 = a0
+    ecall
+    mv       a0,  s0
+    call     printmatrix
+    la       a0,  resstr3
+    addi     a7,  x0,  4       # print "third result:\n"
+    ecall
+    la       a0,  amat3
+    la       a1,  bmat3
     call     matmul            # a0 = matmul(amat, bmat)
     mv       s0,  a0           # s0 = a0
     ecall
