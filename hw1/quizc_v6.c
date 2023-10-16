@@ -9,16 +9,32 @@ typedef struct {
 } matf32_t;
 
 /* data */
-int32_t aarr[9] = {0x3f63d70a, 0x3e3851ec, 0x3d23d70a,
+int32_t aarr1[9] = {0x3f63d70a, 0x3e3851ec, 0x3d23d70a,
 			  0x3d8f5c29, 0x3f800000, 0x3e4ccccd,
 			  0x3e051eb8, 0x00000000, 0x3f333333};
-int32_t barr[9] = {0x3ca3d70a, 0x3f8147ae, 0x3e0f5c29,
+int32_t barr1[9] = {0x3ca3d70a, 0x3f8147ae, 0x3e0f5c29,
 			  0x3dcccccd, 0x3e0f5c29, 0x3f7d70a4,
 			  0x3f5eb852, 0x3e4ccccd, 0x3db851ec};
-matf32_t amat = {.row = 3, .col = 3, .data = aarr};
-matf32_t bmat = {.row = 3, .col = 3, .data = barr};
-char * const heap_start = (char *)0x11400000; /* heap start for hand written malloc */
-char *heap_top = heap_start;
+matf32_t amat1 = {.row = 3, .col = 3, .data = aarr1};
+matf32_t bmat1 = {.row = 3, .col = 3, .data = barr1};
+int32_t aarr2[6] = {0x404ccccd, 0x3f8ccccd, 0x3fa66666,
+			  0x3fcccccd, 0x3fb33333, 0x40133333};
+int32_t barr2[12] = {0x3f8ccccd, 0x3e9eb852, 0x3de147ae, 0x3e570a3d,
+			  0x3f000000, 0x40066666, 0x3db851ec, 0x3ed70a3d,
+			  0x3e99999a, 0x3e2e147b, 0x3fc8f5c3, 0x3e800000};
+matf32_t amat2 = {.row = 2, .col = 3, .data = aarr2};
+matf32_t bmat2 = {.row = 3, .col = 4, .data = barr2};
+int32_t aarr3[9] = {0x3f63d70a, 0x3e3851ec, 0x3d23d70a,
+			  0x3d8f5c29, 0x3f800000, 0x3e4ccccd,
+			  0x3e051eb8, 0x00000000, 0x3f333333};
+int32_t barr3[9] = {0x3e0f5c29, 
+              0x3e0f5c29, 
+              0x3f5eb852};
+matf32_t amat3 = {.row = 3, .col = 3, .data = aarr3};
+matf32_t bmat3 = {.row = 3, .col = 1, .data = barr3};
+char * heap_top = (char *)0x123597af; /* non zero random number so it will not appear in bss and mess with the compiler */
+/* bss */
+int bss_end = 0; /*bss end, heap top should be this + 4*/
 static uint32_t highestbit(register uint32_t x) {
     x |= (x >> 1);
     x |= (x >> 2);
@@ -74,9 +90,9 @@ static int32_t mmul(register int32_t a, register int32_t b) {
 /* float32 multiply */
 static int32_t fmul32(int32_t ia, int32_t ib) {
     /*define const*/
-    register int s0 = 0x7fffff;
-    register int s1 = 0x800000;
-    register int s2 = 0xff;
+    register int32_t s0 = 0x7fffff;
+    register int32_t s1 = 0x800000;
+    register int32_t s2 = 0xff;
     /* define sign */
     register int32_t sr = (ia ^ ib) >> 31 << 31; /*s3*/
     /* define mantissa */
@@ -132,9 +148,9 @@ static int32_t fmul32(int32_t ia, int32_t ib) {
 }
 static int32_t fadd32(int32_t ia, int32_t ib) {
     /*define const*/
-    register int s0 = 0x7fffff;
-    register int s1 = 0x800000;
-    register int s2 = 0xff;
+    register int32_t s0 = 0x7fffff;
+    register int32_t s1 = 0x800000;
+    register int32_t s2 = 0xff;
     /* define sign */
     register int32_t sa = ia >> 31 << 31; /*s3*/
     register int32_t sb = ib >> 31 << 31; /*s4*/
@@ -213,31 +229,32 @@ static int32_t fadd32(int32_t ia, int32_t ib) {
     /* result */
     return sr | ((ear & 0xff) << 23) | (mar & s0);
 }
-static matf32_t *new_mat() {
+static inline matf32_t *new_mat() {
     register char *ptr = (char *) heap_top; /* for exact pointer calculation */
     heap_top = ptr + 12;
     return (matf32_t *) ptr;
 }
-static int32_t *new_arr(int32_t size) {
+static inline int32_t *new_arr(int32_t size) {
     register char *ptr = (char *) heap_top; /* for exact pointer calculation */
     size = size << 2;
     heap_top = ptr + size;
-    register char *cur = heap_top;
-    while(cur < heap_top) {
-        (*cur) = 0;
-    }
+    register int32_t *whptr = (int32_t *)ptr;
+    do {
+        *whptr = 0;
+        whptr ++; /* whptr += 4*/
+    } while(whptr < (int32_t *) heap_top);
     return (int32_t *) ptr;
 }
-/* integer multiply */
-static int32_t imul32(register int32_t a, register int32_t b) {
+/* integer multiply without 0 */
+static inline int32_t imul32(register int32_t a, register int32_t b) {
     register int32_t r = 0;
-    while(b != 0) {
+    do {
         if((b & 1) != 0) {
             r = r + a;
         }
         a = a << 1;
         b = b >> 1;
-    }
+    } while(b != 0);
     return r;
 }
 static matf32_t *matmul(matf32_t *first, matf32_t *second) {
@@ -248,8 +265,11 @@ static matf32_t *matmul(matf32_t *first, matf32_t *second) {
     if(n != second->row) {
         return NULL;
     }
-    /*ret = temporary a2, main (sp+56)*/
-    matf32_t *ret = new_mat();
+    register int32_t *astart = first->data; /*s3*/
+    register int32_t *aptr = astart; /*s5*/
+    register int32_t *bptr = second->data; /*s6*/
+    register int32_t *brow = bptr; /*s8*/
+    matf32_t *ret = new_mat();/*temp #t3 = (sp+56)*/
     if(m <= 0) {
         return ret;
     }
@@ -261,13 +281,9 @@ static matf32_t *matmul(matf32_t *first, matf32_t *second) {
     }
     ret->row = m;
     ret->col = o;
-    ret->data = new_arr(imul32(m, o));
-    register int32_t *astart = first->data; /*s3*/
+    ret->data = new_arr(imul32(m, o)); /*temp #t2*/
     int32_t * const cstart = ret->data; /*(sp+60)*/
-    register int32_t *aptr = astart; /*s5*/
-    register int32_t *bptr = second->data; /*s6*/
     register int32_t *cptr = cstart; /*s7*/
-    register int32_t *brow = bptr; /*s8*/
     register int32_t i, j = 0, k; /*i=s9,  j=s10,  k=s11*/
     m <<= 2;
     n <<= 2;
@@ -338,14 +354,32 @@ void printmatrix(matf32_t *mat) {
     } while(i < row);
 }
 int main() {
+    heap_top = (char *) (&bss_end + 1);/* or any arbitrary number, use 0x10000000 for gcc*/
     /*
     answer should be
     0.0706  0.9321  0.3064
     0.2753  0.2507  1.0178
     0.6116  0.2713  0.0812
     */
-    matf32_t *cmat = matmul(&amat, &bmat);
     printstr("first result:\n");
-    printmatrix(cmat);
+    matf32_t *cmat1 = matmul(&amat1, &bmat1);
+    printmatrix(cmat1);
+    /*
+    answer should be
+    4.46  3.523  2.492  1.459
+    3.15  3.827  3.913  1.499
+    */
+    printstr("second result:\n");
+    matf32_t *cmat2 = matmul(&amat2, &bmat2);
+    printmatrix(cmat2);
+    /*
+    answer should be
+    0.1846
+    0.0917
+    0.8854
+    */
+    printstr("third result:\n");
+    matf32_t *cmat3 = matmul(&amat3, &bmat3);
+    printmatrix(cmat3);
 	return 0;
 }

@@ -5,9 +5,10 @@
     amat:    .word    3, 3, aarr
     barr:    .word    0x3ca3d70a, 0x3f8147ae, 0x3e0f5c29, 0x3dcccccd, 0x3e0f5c29, 0x3f7d70a4, 0x3f5eb852, 0x3e4ccccd, 0x3db851ec
     bmat:    .word    3, 3, barr
+    heap_top:     .word     0x11000000
 .bss
     retdata: .word    0, 0, 0, 0, 0, 0, 0, 0, 0
-    retmat:  .word    0, 0, 0  # matf32_t  
+    retmat:  .word    0, 0, 0  # matf32_t
 .text
 
 start:
@@ -365,9 +366,20 @@ fadd32:
     lw       s11, 48(sp)
     addi     sp,  sp,  120     # free stack
     jr       ra
-new_mat:
 new_arr:
 imul32:
+    li       t0,  0
+    imulls:
+    beqz     a1,  imulle
+    andi     t1,  a1,  1
+    beqz     t1,  +8
+    add      t0,  t0,  a0
+    slli     a0,  a0,  1
+    srai     a1,  a1,  1
+    j        imulls
+    imulle:
+    mv       a0,  t0
+    ret
 matmul:
     addi     sp,  sp,  -132    # allocate stack
     sw       ra,  0(sp)        # save registers
@@ -401,14 +413,18 @@ matmul:
     li       a0,  0            # return NULL
     j        matmulret
     dimok:
-    la       t0,  retmat
-    sw       t0,  72(sp)       # ret = (sp + 72)
+    la       t5,  heap_top
+    lw       t4,  0(t5)
+    mv       t3,  t4
+    addi     t4,  t4,  12
+    sw       t4,  0(t5)
+    sw       t3,  72(sp)       # ret = heap_top = (temp #t3) = (sp + 72)
     lw       t1,  60(sp)
-    sw       t1,  0(t0)        # ret->row = m
+    sw       t1,  0(t3)        # ret->row = m
     lw       t1,  68(sp)
-    sw       t1,  4(t0)        # ret->col = o
+    sw       t1,  4(t3)        # ret->col = o
     la       t1,  retdata
-    sw       t1,  8(t0)        # ret->data = retdata
+    sw       t1,  8(t3)        # ret->data = retdata
     lw       t0,  52(sp)
     lw       t1,  8(t0)
     sw       t1,  76(sp)       # a = first->data = (sp + 76)
@@ -553,15 +569,13 @@ main:
     sw       s9,  40(sp)
     sw       s10, 44(sp)
     sw       s11, 48(sp)
-    
+    la       a0,  resstr
+    addi     a7,  x0,  4       # print "first result:\n"
+    ecall
     la       a0,  amat
     la       a1,  bmat
     call     matmul            # a0 = matmul(amat, bmat)
     mv       s2,  a0           # s2 = a0
-    lw       a0,  resstr
-    addi     a7,  x0,  4       # print "result=\n"
-    ecall
-    printl:
     mv       a0,  s2
     call     printmatrix
     lw       ra,  0(sp)        # restore registers

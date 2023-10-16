@@ -1,5 +1,5 @@
 .data
-    resstr:  .string  "result=\n"
+    resstr:  .string  "first result:\n"
     .align 4
     aarr:    .word    0x3f63d70a, 0x3e3851ec, 0x3d23d70a, 0x3d8f5c29, 0x3f800000, 0x3e4ccccd, 0x3e051eb8, 0x00000000, 0x3f333333
     amat:    .word    3, 3, aarr
@@ -9,7 +9,6 @@
     retdata: .word    0, 0, 0, 0, 0, 0, 0, 0, 0
     retmat:  .word    0, 0, 0  # matf32_t  
 .text
-
 start:
     j        main              # start from main
 highestbit:
@@ -41,18 +40,31 @@ highestbit:
     srli     t0,  a0,  16
     add      a0,  a0,  t0      # x += (x >> 16);
     andi     a0,  a0,  0x7f    # return (x & 0x7f)
-    jr       ra
+    ret
 mmul:
     li       t0,  0            # r = #t0
     slli     a0,  a0,  1
+    mmulls:
     andi     t1,  a1,  1
     beq      t1,  x0,  +8      # skip add if (b & 1) == 0
     add      t0,  t0,  a0
-    srli     a1,  a1,  1
     srli     t0,  t0,  1
-    bne      a1,  x0,  -20     # loop back if b != 0
+    andi     t1,  a1,  2
+    beq      t1,  x0,  +8      # skip add if (b & 1) == 0
+    add      t0,  t0,  a0
+    srli     t0,  t0,  1
+    andi     t1,  a1,  4
+    beq      t1,  x0,  +8      # skip add if (b & 1) == 0
+    add      t0,  t0,  a0
+    srli     t0,  t0,  1
+    andi     t1,  a1,  8
+    beq      t1,  x0,  +8      # skip add if (b & 1) == 0
+    add      t0,  t0,  a0
+    srli     a1,  a1,  4
+    srli     t0,  t0,  1
+    bne      a1,  x0,  mmulls  # loop back if b != 0
     mv       a0,  t0
-    jr       ra
+    ret
 fmul32:
     addi     sp,  sp,  -32     # allocate stack (leave 1 word empty)
     sw       ra,  0(sp)        # save registers
@@ -87,7 +99,7 @@ fmul32:
     li       a0,  0x7f800001   # return nan
     j        fadd32ret
     mulsaf:
-    bne      s5,  x0,  mulsa0  # skip if eb != 0
+    bnez     s5,  mulsa0       # skip if eb != 0
     li       a0,  0x7f800001   # return nan
     j        fadd32ret
     mulsa0:
@@ -150,7 +162,7 @@ fmul32:
     lw       s4,  20(sp)
     lw       s5,  24(sp)
     addi     sp,  sp,  32      # free stack
-    jr       ra
+    ret
 fadd32:
     addi     sp,  sp,  -48     # allocate stack (leave 1 word empty)
     sw       ra,  0(sp)        # save registers
@@ -287,9 +299,9 @@ fadd32:
     lw       s8,  36(sp)
     lw       s9,  40(sp)
     addi     sp,  sp,  48      # free stack
-    jr       ra
+    ret
 matmul:
-    addi     sp,  sp,  -132    # allocate stack
+    addi     sp,  sp,  -68     # allocate stack
     sw       ra,  0(sp)        # save registers
     sw       s0,  4(sp)
     sw       s1,  8(sp)
@@ -302,118 +314,64 @@ matmul:
     sw       s8,  36(sp)
     sw       s9,  40(sp)
     sw       s10, 44(sp)
-    sw       s11, 48(sp)
-    sw       a0,  52(sp)       # first = (sp + 52)
-    sw       a1,  56(sp)       # second = (sp + 56)
-    lw       t0,  52(sp)
-    lw       t1,  0(t0)
-    sw       t1,  60(sp)       # m = (sp + 60)
-    lw       t0,  52(sp)
-    lw       t1,  4(t0)
-    sw       t1,  64(sp)       # n = (sp + 64)
-    lw       t0,  56(sp)
-    lw       t1,  4(t0)
-    sw       t1,  68(sp)       # o = (sp + 68)
-    lw       t0,  64(sp)
-    lw       t2,  56(sp)
-    lw       t1,  0(t2)
-    beq      t0,  t1,  dimok   # skip if n == second->row
-    li       a0,  0            # return NULL
+    sw       s11, 52(sp)
+    lw       s0,  0(a0)        # m = #s0
+    lw       s1,  4(a0)        # n = #s1
+    lw       t0,  0(a1)
+    lw       s2,  4(a1)        # o = #s2
+    beq      s1,  t0,  +12     # return null if dimension doesn't match
+    li       a0,  0
     j        matmulret
-    dimok:
-    la       t0,  retmat
-    sw       t0,  72(sp)       # ret = (sp + 72)
-    lw       t1,  60(sp)
-    sw       t1,  0(t0)        # ret->row = m
-    lw       t1,  68(sp)
-    sw       t1,  4(t0)        # ret->col = o
-    la       t1,  retdata
-    sw       t1,  8(t0)        # ret->data = retdata
-    lw       t0,  52(sp)
-    lw       t1,  8(t0)
-    sw       t1,  76(sp)       # a = first->data = (sp + 76)
-    lw       t0,  56(sp)
-    lw       t1,  8(t0)
-    sw       t1,  80(sp)       # b = second->data = (sp + 80)
-    lw       t0,  72(sp)
-    lw       t1,  8(t0)
-    sw       t1,  84(sp)       # c = ret->data = (sp + 84)
-    sw       x0,  88(sp)       # subtotal = (sp + 88)
-    sw       x0,  92(sp)       # arow = (sp + 92)
-    sw       x0,  96(sp)       # aidx = (sp + 96)
-    sw       x0,  100(sp)      # bidx = (sp + 100)
-    lw       t1,  84(sp)
-    sw       t1,  104(sp)      # cptr = c = (sp + 104)
-    sw       x0,  108(sp)      # i = (sp + 108)
-    sw       x0,  112(sp)      # j = (sp + 112)
-    sw       x0,  116(sp)      # k = (sp + 116)
-    matmis:
-    lw       t0,  108(sp)
-    lw       t1,  60(sp)
-    bge      t0,  t1,  matmie  # end if i >= m
-    sw       x0,  112(sp)      # j = 0
-    matmjs:
-    lw       t0,  112(sp)
-    lw       t1,  68(sp)
-    bge      t0,  t1,  matmje  # end if j >= o
-    sw       x0,  88(sp)       # subtotal = 0
-    lw       t0,  92(sp)
-    sw       t0,  96(sp)       # aidx = arow
-    lw       t0,  112(sp)
-    sw       t0,  100(sp)      # bidx = j
-    sw       x0,  116(sp)      # k = 0
-    matmks:
-    lw       t0,  116(sp)
-    lw       t1,  64(sp)
-    bge      t0,  t1,  matmke  # end if k >= n
-    lw       t0,  96(sp)
-    lw       t1,  76(sp)
-    slli     t0,  t0, 2
-    add      t0,  t0, t1
-    lw       a0,  0(t0)        # get a[aidx]
-    lw       t0,  100(sp)
-    lw       t1,  80(sp)
-    slli     t0,  t0, 2
-    add      t0,  t0, t1
-    lw       a1,  0(t0)        # get b[bidx]
-    call     fmul32            # a0 = fmul32(a[aidx], b[bidx])
-    lw       a1,  88(sp)
-    call     fadd32            # a0 = fadd32(a0, subtotal)
-    sw       a0,  88(sp)
-    lw       t0,  96(sp)
-    addi     t0,  t0,  1
-    sw       t0,  96(sp)       # aidx += 1
-    lw       t0,  100(sp)
-    lw       t1,  68(sp)
-    add      t0,  t0,  t1
-    sw       t0,  100(sp)      # bidx += o
-    lw       t0,  116(sp)
-    addi     t0,  t0,  1
-    sw       t0,  116(sp)      # k += 1
-    j        matmks
-    matmke:
-    lw       t0,  88(sp)
-    lw       t1,  104(sp)
-    sw       t0,  0(t1)        # *(cptr) = subtotal
-    lw       t1,  104(sp)
-    addi     t1,  t1,  4
-    sw       t1,  104(sp)      # cptr += 1
-    lw       t0,  112(sp)
-    addi     t0,  t0,  1
-    sw       t0,  112(sp)      # j += 1
-    j        matmjs
-    matmje:
-    lw       t0,  92(sp)
-    lw       t1,  64(sp)
-    add      t0,  t0,  t1
-    sw       t0,  92(sp)       # arow += n;
-    lw       t0,  108(sp)
-    addi     t0,  t0,  1
-    sw       t0,  108(sp)      # i += 1
-    j        matmis
-    matmie:
-    lw       a0,  72(sp)
+    lw       s3,  8(a0)        # astart = #s3
+    mv       s5,  s3           # aptr = #s5
+    lw       s6,  8(a1)        # bptr = #s6
+    mv       s8,  s6           # brow = #s8
+    la       t3,  retmat
+    sw       t3   56(sp)       # ret = (temp #t3) = (sp+56)
+    bgtz     s0,  +8           # not return if m > 0
+    j        matmulret
+    bgtz     s1,  +8           # not return if n > 0
+    j        matmulret
+    bgtz     s2,  +8           # not return if o > 0
+    j        matmulret
+    sw       s0,  0(t3)        # ret->row = m
+    sw       s2,  4(t3)        # ret->col = o
+    la       t2,  retdata
+    sw       t2,  8(t3)        # ret->data = retdata = (temp #t2)
+    sw       t2,  60(sp)       # cstart = (sp+60)
+    mv       s7,  t2           # cptr = #s7
+    mv       s8,  s6           # brow = #s8
+    li       s10, 0            # i = #s9,  j = #s10,  k = #s11
+    slli     s0,  s0,  2       # m <<= 2
+    slli     s1,  s1,  2       # n <<= 2
+    slli     s2,  s2,  2       # o <<= 2
+    matjs:
+    add      s5,  s3,  s10     # aptr = astart + j
+    lw       s7,  60(sp)       # cptr = cstart
+    li       s9,  0            # i = 0
+    matis:
+    mv       s6,  s8           # bptr = brow
+    lw       s4,  0(s5)        # aval = *aptr
+    li       s11, 0            # k = 0
+    matks:
+    lw       a1,  0(s6)
+    mv       a0,  s4
+    call     fmul32
+    lw       a1,  0(s7)
+    call     fadd32
+    sw       a0,  0(s7)        # *cptr = fadd32(fmul32(aval, *bptr), *cptr)
+    addi     s6,  s6,  4       # bptr += 4
+    addi     s7,  s7,  4       # cptr += 4
+    addi     s11, s11, 4       # k += 4
+    blt      s11, s2,  matks   # loop if k < o
+    add      s5,  s5,  s2      # aptr += o
+    addi     s9,  s9,  4       # i += 4
+    blt      s9,  s0,  matis   # loop if i < m
+    add      s8,  s8,  s2      # brow += o
+    addi     s10, s10, 4       # j += 4
+    blt      s10, s1,  matjs   # loop if j < n
     matmulret:
+    lw       a0,  56(sp)       # return ret
     lw       ra,  0(sp)        # restore registers
     lw       s0,  4(sp)
     lw       s1,  8(sp)
@@ -427,31 +385,57 @@ matmul:
     lw       s9,  40(sp)
     lw       s10, 44(sp)
     lw       s11, 48(sp)
-    addi     sp,  sp,  132     # free stack
+    addi     sp,  sp,  68      # free stack
+    ret
+printmatrix:
+    lw       t0,  0(a0)
+    lw       t1,  4(a0)
+    bne      t0,  x0,  +8
     jr       ra
+    bne      t1,  x0,  +8
+    jr       ra
+    lw       t2,  8(a0)
+    li       t3,  0
+    li       t4,  0
+    printis:
+    li       t5,  0
+    printjs:
+    add      a1,  t2,  t4
+    lw       a0,  0(a1)
+    li       a7,  2
+    ecall
+    li       a0,  32
+    li       a7,  11
+    ecall
+    addi     t5,  t5,  1
+    addi     t4,  t4,  4
+    blt      t5,  t1,  printjs
+    li       a0,  10
+    li       a7,  11
+    ecall
+    addi     t3,  t3,  1
+    blt      t3,  t0,  printis
+    ret
 main:
-    addi     sp,  sp,  -4      # allocate stack
-    sw       ra,  0(sp)        # save ra
+    addi     sp,  sp,  -16     # allocate stack
+    sw       ra,  0(sp)        # save registers
+    sw       s0,  4(sp)
+    sw       s1,  8(sp)
+    sw       s2,  12(sp)
+    la       a0,  resstr
+    addi     a7,  x0,  4       # print "first result:\n"
+    ecall
     la       a0,  amat
     la       a1,  bmat
-    call     matmul            # cmat = matmul(amat, bmat)
-    lw       t0,  8(a0)        # c = cmat->data = #t0
-    lw       a0,  resstr
-    addi     a7,  x0,  4       # print "result=\n"
+    call     matmul            # a0 = matmul(amat, bmat)
+    mv       s0,  a0           # s0 = a0
     ecall
-    li       t1,  0            # i = #t1
-    li       t2,  9            # 9 = #t2
-    printl:
-    lw       a0,  0(t0)
-    addi     a7,  x0,  2       # print aarr[i]
-	ecall
-    li       a0,  10
-    addi     a7,  x0,  11      # print '\n'
-	ecall
-    addi     t0,  t0,  4
-    addi     t1,  t1,  1
-    blt      t1,  t2,  printl  # loop while i < 9
-    lw       ra,  0(sp)        # restore ra
-    addi     sp,  sp,  4       # free stack
+    mv       a0,  s0
+    call     printmatrix
+    lw       ra,  0(sp)        # restore registers
+    lw       s0,  4(sp)
+    lw       s1,  8(sp)
+    lw       s2,  12(sp)
+    addi     sp,  sp,  16      # free stack
 	li       a7,  10           # return 0
 	ecall
