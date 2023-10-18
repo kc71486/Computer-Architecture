@@ -1,57 +1,7 @@
-.data
-    test_data_1: .dword 0x0000000000100000, 0x00000000000FFFFF # HD(1048576, 1048575) = 21
-    test_data_2: .dword 0x0000000000000001, 0x7FFFFFFFFFFFFFFE # HD(1, 9223372036854775806) = 63
-    test_data_3: .dword 0x000000028370228F, 0x000000028370228F # HD(10795098767, 10795098767) = 0
-    msg_string: .string "\nHamming Distance="
-    .align 4
 .text
-main:
-    addi sp, sp, -12
-    call getCycle
-    # push pointers of test data onto the stack
-    la t0, test_data_1
-    sw t0, 0(sp)
-    la t0, test_data_2
-    sw t0, 4(sp)
-    la t0, test_data_3
-    sw t0, 8(sp)
- 
-    # initialize main_loop
-    addi s0, zero, 3    # s0 : number of test case
-    addi s1, zero, 0    # s1 : test case counter
-    addi s2, sp, 0      # s2 : points to test_data_1
-main_loop:
-    la a0, msg_string
-    li a7, 4            # print string
-    ecall
-    
-    lw a0, 0(s2)        # a0 : pointer to the first data in test_data_1
-    addi a1, a0, 8      # a1 : pointer to the second data in test_data_1
-    jal ra, hd_func
-    
-    # print the result #
-    li a7, 1            # print integer
-    ecall               # print result of hd_cal (which is in a0)
-    
-    addi s2, s2, 4      # s2 : points to next test_data
-    addi s1, s1, 1      # counter++
-    bne s1, s0, main_loop
-    li a0, 10
-    li a7, 11
-    ecall
-    call getCycle
-    addi sp, sp, 12
-    li a7, 10
-    ecall
-getCycle:
-    li a7, 31
-    ecall
-    li a7, 1
-    ecall
-    li a0, 10
-    li a7, 11
-    ecall
-    ret
+
+.globl HammingDistance_s
+.align 2
 # hamming distance function
 HammingDistance_s:
     addi sp, sp, -36
@@ -72,14 +22,14 @@ HammingDistance_s:
     # get x0_digit
     lw a0, 0(s0)        # a0 : lower part of x0
     lw a1, 4(s0)        # a1 : higher part of x0
-    jal ra clz
+    jal ra count_leading_zeros
     li s2, 64
     sub s2, s2, a0      # s2 : x0_digit (return value saved in a0)
 
     # get x1_digit
     lw a0, 0(s1)        # a0 : lower part of x1
     lw a1, 4(s1)        # a1 : higher part of x1
-    jal ra clz
+    jal ra count_leading_zeros
     li s3, 64
     sub s3, s3, a0      # s3 : x1_digit (return value saved in a0)
     
@@ -162,7 +112,7 @@ hd_check_loop:
     j hd_func_end
 
 # count leading zeros
-clz:
+count_leading_zeros:
     addi sp, sp, -4
     sw ra, 0(sp)
     beq a1, zero, clz_lower_set_one
@@ -291,3 +241,5 @@ clz_count_ones:
     lw ra, 0(sp)
     addi sp, sp, 4
     ret
+
+.size HammingDistance_s, .-HammingDistance_s
