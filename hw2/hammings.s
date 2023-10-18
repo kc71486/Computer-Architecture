@@ -22,14 +22,14 @@ HammingDistance_s:
     # get x0_digit
     lw a0, 0(s0)        # a0 : lower part of x0
     lw a1, 4(s0)        # a1 : higher part of x0
-    jal ra count_leading_zeros
+    jal ra clz
     li s2, 64
     sub s2, s2, a0      # s2 : x0_digit (return value saved in a0)
 
     # get x1_digit
     lw a0, 0(s1)        # a0 : lower part of x1
     lw a1, 4(s1)        # a1 : higher part of x1
-    jal ra count_leading_zeros
+    jal ra clz
     li s3, 64
     sub s3, s3, a0      # s3 : x1_digit (return value saved in a0)
     
@@ -112,7 +112,7 @@ hd_check_loop:
     j hd_func_end
 
 # count leading zeros
-count_leading_zeros:
+clz:
     addi sp, sp, -4
     sw ra, 0(sp)
     beq a1, zero, clz_lower_set_one
