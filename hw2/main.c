@@ -5,9 +5,9 @@ extern uint64_t get_cycles();
 
 extern int HammingDistance(uint64_t, uint64_t);
 
-uint64_t test1_x0 = 0x0000000000100000;
+uint64_t test1_x0 = 0x0013000000100000;
 uint64_t test1_x1 = 0x00000000000FFFFF;
-uint64_t test2_x0 = 0x0000000000000001;
+uint64_t test2_x0 = 0x0000000200000001;
 uint64_t test2_x1 = 0x7FFFFFFFFFFFFFFE;
 uint64_t test3_x0 = 0x000000028370228F;
 uint64_t test3_x1 = 0x000000028370228F;
