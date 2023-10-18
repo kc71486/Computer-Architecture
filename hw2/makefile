@@ -8,7 +8,8 @@ CFLAGS = -O0 -Wall -Wextra
 OBJS = \
     getcycles.o \
     main.o \
-    hammingc.o
+    hammingc.o \
+    hammings.o
 
 BIN = hammingdistance.elf
 
