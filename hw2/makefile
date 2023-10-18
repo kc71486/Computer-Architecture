@@ -3,7 +3,7 @@
 include toolchain.mk
 
 ASFLAGS = -march=rv32i_zicsr -mabi=ilp32
-CFLAGS = -O2 -Wall
+CFLAGS = -O0 -Wall -Wextra
 
 OBJS = \
     getcycles.o \
