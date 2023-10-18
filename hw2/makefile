@@ -3,15 +3,12 @@
 include toolchain.mk
 
 ASFLAGS = -march=rv32i_zicsr -mabi=ilp32
-LDFLAGS = --oformat=elf32-littleriscv
 CFLAGS = -O2 -Wall
 
 OBJS = \
     getcycles.o \
     main.o \
     hammingc.o
-
-LDS = link.ld
 
 BIN = hammingdistance.elf
 
@@ -24,7 +21,7 @@ BIN = hammingdistance.elf
 all: $(BIN)
 
 $(BIN): $(OBJS)
-	 $(CROSS_COMPILE)ld -o $@ -T $(LDS) $(LDFLAGS) -lc $^
+	 $(CROSS_COMPILE)gcc -o $@ $^
 
 clean:
 	$(RM) $(BIN) $(OBJS)
