@@ -2,7 +2,7 @@
 
 include toolchain.mk
 
-ASFLAGS = -march=rv32i -mabi=ilp32
+ASFLAGS = -march=rv32i_zicsr -mabi=ilp32
 LDFLAGS = --oformat=elf32-littleriscv
 CFLAGS = -O2 -Wall
 
