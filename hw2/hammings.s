@@ -53,7 +53,7 @@ getCycle:
     ecall
     ret
 # hamming distance function
-hd_func:
+HammingDistance_s:
     addi sp, sp, -36
     sw ra, 0(sp)
     sw s0, 4(sp)        # address of x0
