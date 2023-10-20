@@ -8,8 +8,8 @@ CFLAGS = -O0 -Wall -Wextra
 OBJS = \
     getcycles.o \
     main.o \
-    hammingc.o \
-    hammings.o
+    hammingc_v0.o \
+    hammings_v0.o
 
 BIN = hammingdistance.elf
 
@@ -22,7 +22,7 @@ BIN = hammingdistance.elf
 all: $(BIN)
 
 $(BIN): $(OBJS)
-	 $(CROSS_COMPILE)gcc -o $@ $^
+	$(CROSS_COMPILE)gcc -o $@ $^
 
 clean:
 	$(RM) $(BIN) $(OBJS)

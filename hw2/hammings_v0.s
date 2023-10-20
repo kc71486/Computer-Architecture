@@ -1,9 +1,9 @@
 .text
 
-.globl HammingDistance_s
+.globl HammingDistancev0_s
 .align 2
 # hamming distance function
-HammingDistance_s:
+HammingDistancev0_s:
     addi sp, sp, -36
     sw ra, 0(sp)
     sw s0, 4(sp)        # address of x0
@@ -242,4 +242,4 @@ clz_count_ones:
     addi sp, sp, 4
     ret
 
-.size HammingDistance_s, .-HammingDistance_s
+.size HammingDistancev0_s, .-HammingDistancev0_s
