@@ -29,7 +29,7 @@ HammingDistance_new_s:
     bgt s5, s7, paramx0
     blt s5, s7, paramx1
     bgt s4, s6, paramx0
-    j, paramx1
+    j  paramx1
 paramx0:
     mv a0, s4           # a0 : lower part of x0
     mv a1, s5           # a1 : higher part of x0
