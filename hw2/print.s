@@ -1,11 +1,16 @@
 .set SYSWRITE, 64
 .set STDOUT, 1
+.set INTBUFSIZE 11
+
+.extern itos
 
 .global printstr
 .global printchar
+.global printint
 
 .bss
-    pch: .byte 0, 0
+    pch:  .byte 0, 0
+    pint: .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 .text
 .align 2
@@ -25,6 +30,24 @@ printchar:
     sw a0, 0(a1)        # put char into fake string
     li a0, STDOUT       # write to stdout
     la a2, 1            # length = 2
-    li a7, SYSWRITE     # "write" syscall
+    li a7, SYSWRITE
     ecall               # invoke syscall
+    ret
+
+# void printint(int32_t);
+printint:
+    addi sp, sp, -8
+    sw ra, 0(sp)
+    sw s1, 4(sp)
+    la s1, pint
+    mv a1, s1           # fake string
+    li a2, INTBUFSIZE
+    call  itos          # convert to string
+    mv a2, a0           # get return value as size
+    mv a1, s1           # same fake string
+    li a0, STDOUT       # write to stdout
+    li a7, SYSWRITE
+    ecall               # invoke syscall
+    lw ra, 0(sp)
+    lw s1, 4(sp)
     ret
