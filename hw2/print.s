@@ -12,3 +12,4 @@ printstr:
     li a0, STDOUT       # write to stdout
     li a7, SYSWRITE     # "write" syscall
     ecall               # invoke syscall to print the string
+    ret
