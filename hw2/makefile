@@ -6,10 +6,10 @@ ASFLAGS = -march=rv32i_zicsr -mabi=ilp32
 CFLAGS = -O0 -Wall -Wextra
 
 OBJS = \
+    main.o \
     getcycles.o \
     print.o \
     convert.o \
-    main.o \
     hammingc.o \
     hammings.o
 

@@ -1,11 +1,12 @@
 #include <stdint.h>
 #include "convert.h"
+#include "print.h"
 
 extern uint64_t get_cycles();
 
-extern void printstr(const char *, uint32_t);
-extern void printchar(char);
-extern void printint(int32_t);
+//extern void printstr(const char *, uint32_t);
+//extern void printchar(char);
+//extern void printint(int32_t);
 
 //extern int32_t HammingDistance_c(uint64_t, uint64_t);
 extern int32_t HammingDistance_s(uint64_t *, uint64_t *);
