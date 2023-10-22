@@ -50,4 +50,5 @@ printint:
     ecall               # invoke syscall
     lw ra, 0(sp)
     lw s1, 4(sp)
+    addi sp, sp, 8
     ret
