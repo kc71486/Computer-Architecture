@@ -1,7 +1,8 @@
-.text
+.global get_cycles
 
-.globl get_cycles
+.text
 .align 2
+
 get_cycles:
     csrr a1, cycleh
     csrr a0, cycle
