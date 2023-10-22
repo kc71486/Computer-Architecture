@@ -7,6 +7,7 @@ CFLAGS = -O0 -Wall -Wextra
 
 OBJS = \
     getcycles.o \
+    print.o \
     main.o \
     hammingc.o \
     hammings.o
