@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdint.h>
 
 static uint16_t count_leading_zeros(uint64_t x) {

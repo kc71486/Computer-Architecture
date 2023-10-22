@@ -1,5 +1,5 @@
-# ifndef CONVERT_H
-# define CONVERT_H
+#ifndef CONVERT_H
+#define CONVERT_H
 
 /*
  * Convert integer into string form.

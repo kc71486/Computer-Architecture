@@ -1,5 +1,5 @@
-# ifndef PRINT_H
-# define PRINT_H
+#ifndef PRINT_H
+#define PRINT_H
 
 /*
  * Print string into stdout.
