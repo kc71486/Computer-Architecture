@@ -24,7 +24,7 @@ BIN = hammingdistance.elf
 all: $(BIN)
 
 $(BIN): $(OBJS)
-	$(CROSS_COMPILE)ld -o $@ $^
+	$(CROSS_COMPILE)gcc -o $@ $^
 
 clean:
 	$(RM) $(BIN) $(OBJS)
