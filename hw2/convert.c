@@ -4,9 +4,9 @@ int32_t itos(int32_t input, char *str, int32_t strsize) {
     if(input == 0) {
         str[0] = '0';
         str[1] = 0;
-        return;
+        return 2;
     }
-    char[12] buf = {0};
+    char buf[12] = {0};
     int32_t bufidx = 0;
     int32_t stridx = 0;
     while(input > 0) {
@@ -16,7 +16,7 @@ int32_t itos(int32_t input, char *str, int32_t strsize) {
     }
     // will buffer overflow
     if(bufidx > strsize) {
-        return;
+        return 0;
     }
     while(bufidx > 0) {
         bufidx --;
