@@ -1,6 +1,6 @@
 .set SYSWRITE, 64
 .set STDOUT, 1
-.set INTBUFSIZE 11
+.set INTBUFSIZE, 11
 
 .extern itos
 
