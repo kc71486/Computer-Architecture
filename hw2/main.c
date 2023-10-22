@@ -24,7 +24,7 @@ int main(){
     int32_t d3 = HammingDistance_s(&test3_x0, &test3_x1);
     uint32_t end = get_cycles();
     printstr("Elapse cycle:", 14);
-    printf("ld\n", end - start);
+    printf("%ld\n", end - start);
     printf("Hamming Distance:%ld\n", d1); // 24
     printf("Hamming Distance:%ld\n", d2); // 62
     printf("Hamming Distance:%ld\n", d3); // 0
