@@ -3,6 +3,7 @@
 .text
 .align 2
 
+# uint64_t get_cycles();
 get_cycles:
     csrr a1, cycleh
     csrr a0, cycle
