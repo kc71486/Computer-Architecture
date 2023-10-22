@@ -1,14 +1,14 @@
 .text
 
-.globl HammingDistancev0_s
+.globl HammingDistance_new_s
 .align 2
 # hamming distance function
-HammingDistancev0_s:
+HammingDistance_new_s:
     addi sp, sp, -36
     sw ra, 0(sp)
     sw s0, 4(sp)        # address of x0
     sw s1, 8(sp)        # address of x1
-    sw s2, 12(sp)       # digit of x0
+    sw s2, 12(sp)       # max_digit
     sw s3, 16(sp)       # digit of x1
     sw s4, 20(sp)       # lower part of x0
     sw s5, 24(sp)       # higher part of x0
@@ -19,45 +19,34 @@ HammingDistancev0_s:
     mv s0, a0           # s0 : address of x0
     mv s1, a1           # s1 : address of x1
 
-    # get x0_digit
-    lw a0, 0(s0)        # a0 : lower part of x0
-    lw a1, 4(s0)        # a1 : higher part of x0
-    jal ra, count_leading_zero
-    li s2, 64
-    sub s2, s2, a0      # s2 : x0_digit (return value saved in a0)
-
-    # get x1_digit
-    lw a0, 0(s1)        # a0 : lower part of x1
-    lw a1, 4(s1)        # a1 : higher part of x1
-    jal ra, count_leading_zero
-    li s3, 64
-    sub s3, s3, a0      # s3 : x1_digit (return value saved in a0)
-    
     # get x0(s5 s4) and x1(s7 s6)
     lw s4, 0(s0)
     lw s5, 4(s0)
     lw s6, 0(s1)
     lw s7, 4(s1)
-
-    # compare with two digit
-    slt t0, s2, s3
-    bne t0, zero, x1_larger
+    
+    # compare x0 with x1
+    bgt s5, s7, paramx0
+    blt s5, s7, paramx1
+    bgt s4, s6, paramx0
+    j, paramx1
+paramx0:
+    mv a0, s4           # a0 : lower part of x0
+    mv a1, s5           # a1 : higher part of x0
+    j  endparam
+paramx1:
+    mv a0, s6           # a0 : lower part of x1
+    mv a1, s7           # a1 : higher part of x1
+endparam:
+    jal ra, count_leading_zero
+    li s2, 64
+    sub s2, s2, a0      # s2 : max_digit (return value saved in a0)
     mv s3, zero         # s3: hd counter
     bgt s2, zero, hd_cal_loop
-    
     # when digit is 0
-    mv a0, s2            # save max_digit to a0
-    j hd_func_end        
-
-x1_larger:
-    mv s2, s3          # s2 : max_digit
-    mv s3, zero        # s3: hd counter
-    bgt s2, zero, hd_cal_loop
-    
-    # when digit is 0
-    mv a0, s2            # save max_digit to a0
+    mv a0, s2           # save max_digit to a0
     j hd_func_end
-
+    
 hd_func_end:
     lw ra, 0(sp)
     lw s0, 4(sp)
@@ -73,23 +62,11 @@ hd_func_end:
 
 # hamming distance calculation (result save in a0, a1)
 hd_cal_loop:
-    # when the current digit larger than 32
-    addi t2, zero, 32
-    bgt s2, t2, hd_getLSB_upper
-
-    # hd_getLSB_lower : and with 1
+    # c1 = x0 & 1, c2 = x1 & 1
     li t3, 0x00000001
     and t4, s4, t3
     and t5, s6, t3
-    j hd_cal_shift
-
-hd_getLSB_upper:
-    # and with 1
-    li t3, 0x00000001
-    and t4, s5, t3
-    and t5, s7, t3
-
-hd_cal_shift:
+    
     # (s5 s4) = x >> 1
     srli t0, s4, 1
     slli t1, s5, 31
@@ -242,4 +219,4 @@ clz_count_ones:
     addi sp, sp, 4
     ret
 
-.size HammingDistancev0_s, .-HammingDistancev0_s
+.size HammingDistance_new_s, .-HammingDistance_new_s
