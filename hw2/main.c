@@ -33,6 +33,7 @@ int main(){
     (void) itos(end - start, intbuf, 20);
     printstr(intbuf, 15);
     printchar('\n');
+    (void) printf(intbuf); // 24
     (void) printf("Hamming Distance:%ld\n", d1); // 24
     (void) printf("Hamming Distance:%ld\n", d2); // 62
     (void) printf("Hamming Distance:%ld\n", d3); // 0

@@ -22,9 +22,8 @@ printstr:
 # void printchar(char);
 printchar:
     la a1, pch          # fake string
-    lw a0, 0(a1)        # put char into fake string
+    sw a0, 0(a1)        # put char into fake string
     li a0, STDOUT       # write to stdout
-    la a1, pch          # fake string
     la a2, 1            # length = 2
     li a7, SYSWRITE     # "write" syscall
     ecall               # invoke syscall
