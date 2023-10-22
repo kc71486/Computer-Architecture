@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <stdio.h>
 
 extern uint64_t get_cycles();
 
@@ -30,10 +29,12 @@ int main(){
     int32_t d2 = HammingDistance_s(&test2_x0, &test2_x1);
     int32_t d3 = HammingDistance_s(&test3_x0, &test3_x1);
     uint32_t end = get_cycles();
+    // first print method
     printstr("Elapse cycle:", 14);
     int strsize = itos(end - start, intbuf, 20);
     printstr(intbuf, strsize);
     printchar('\n');
+    // second print method
     printstr("Hamming Distance:", 18);
     printint(d1);
     printchar('\n');
