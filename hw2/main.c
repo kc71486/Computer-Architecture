@@ -37,8 +37,11 @@ int main(){
     printstr("Hamming Distance:", 18);
     printint(d1);
     printchar('\n');
-    (void) printf("Hamming Distance:%ld\n", d1); // 24
-    (void) printf("Hamming Distance:%ld\n", d2); // 62
-    (void) printf("Hamming Distance:%ld\n", d3); // 0
+    printstr("Hamming Distance:", 18);
+    printint(d2);
+    printchar('\n');
+    printstr("Hamming Distance:", 18);
+    printint(d3);
+    printchar('\n');
     return 0;
 }
