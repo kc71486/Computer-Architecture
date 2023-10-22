@@ -5,6 +5,7 @@ extern uint64_t get_cycles();
 
 extern void printstr(const char *, uint32_t);
 extern void printchar(char);
+extern void printint(int32_t);
 
 extern int32_t itos(int32_t, char *, int32_t);
 
@@ -32,6 +33,9 @@ int main(){
     printstr("Elapse cycle:", 14);
     int strsize = itos(end - start, intbuf, 20);
     printstr(intbuf, strsize);
+    printchar('\n');
+    printstr("Hamming Distance:", 18);
+    printint(d1);
     printchar('\n');
     (void) printf("Hamming Distance:%ld\n", d1); // 24
     (void) printf("Hamming Distance:%ld\n", d2); // 62
