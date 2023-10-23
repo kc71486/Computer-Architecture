@@ -28,7 +28,7 @@ int main(){
     // first print method
     printstr("Elapse cycle:", 13);
     int strsize = itos(end - start, intbuf, 12);
-    printstr(intbuf, strsize);
+    printstr(intbuf, strsize - 1);
     printchar('\n');
     // second print method
     printstr("Hamming Distance:", 17);
