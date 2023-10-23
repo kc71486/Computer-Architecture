@@ -9,7 +9,7 @@ HammingDistance_s:
     sw s0, 4(sp)        # address of x0
     sw s1, 8(sp)        # address of x1
     sw s2, 12(sp)       # max_digit
-    sw s3, 16(sp)       # digit of x1
+    sw s3, 16(sp)       # hdist counter
     sw s4, 20(sp)       # lower part of x0
     sw s5, 24(sp)       # higher part of x0
     sw s6, 28(sp)       # lower part of x1
@@ -41,11 +41,29 @@ endparam:
     jal ra, count_leading_zero
     li s2, 64
     sub s2, s2, a0      # s2 : max_digit (return value saved in a0)
-    mv s3, zero         # s3: hd counter
-    bgt s2, zero, hd_cal_loop
-    # when digit is 0
-    mv a0, s2           # save max_digit to a0
-    j hd_func_end
+    li s3, 0            # s3: hdist counter
+    
+    li t3, 32
+    blt s2, t3, loop1e
+loop1s:
+    xor t0, s5, s7
+    andi s3, t0, 1
+    srli s5, s5, 1
+    srli s7, s7, 1
+    addi s2, s2, -1
+    bgt s2, t3, loop1s
+loop1e:
+    blt s2, zero, loop1e
+loop2s:
+    xor t0, s4, s6
+    andi s4, t0, 1
+    srli s4, s4, 1
+    srli s6, s6, 1
+    addi s2, s2, -1
+    bgt s2, zero, loop2s
+loop2e:
+    mv a0, s3
+    
     
 hd_func_end:
     lw ra, 0(sp)
@@ -59,33 +77,6 @@ hd_func_end:
     lw s7, 32(sp)
     addi sp, sp, 36
     ret
-
-# hamming distance calculation (result save in a0, a1)
-hd_cal_loop:
-    # c1 = x0 & 1, c2 = x1 & 1
-    andi t4, s4, 1
-    andi t5, s6, 1
-    
-    # (s5 s4) = x >> 1
-    srli t0, s4, 1
-    slli t1, s5, 31
-    or s4, t0, t1       # s4 >> 1
-    srli s5, s5, 1      # s5 >> 1
-
-    # (s7 s6) = x >> 1
-    srli t0, s6, 1
-    slli t1, s7, 31
-    or s6, t0, t1       # s6 >> 1
-    srli s7, s7, 1      # s7 >> 1
-
-    beq t4, t5, hd_check_loop
-    addi s3, s3, 1
-    
-hd_check_loop:
-    addi s2, s2, -1
-    bne s2, zero, hd_cal_loop
-    mv a0, s3            # save return value to a0
-    j hd_func_end
 
 # count leading zeros
 count_leading_zero:
@@ -105,7 +96,6 @@ count_leading_zero:
     or a0, a0, t0
     
     # clz
-    
     li t1, 0x55555555
     and  t1, t0, t1
     sub  a0, a0, t1      # x -= ((x >> 1) & 0x55555555)

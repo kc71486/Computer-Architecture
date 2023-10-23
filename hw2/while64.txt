@@ -1,0 +1,12 @@
+while(max_digit > 32) {
+    Hdist += (y0 ^ y1) & 1;
+    y0 = y0 >> 1;
+    y1 = y1 >> 1;
+    max_digit -= 1;
+}
+while(max_digit > 0) {
+    Hdist += (x0 ^ x1) & 1;
+    x0 = x0 >> 1;
+    x1 = x1 >> 1;
+    max_digit -= 1;
+}
