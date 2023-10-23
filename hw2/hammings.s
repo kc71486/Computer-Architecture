@@ -63,9 +63,8 @@ hd_func_end:
 # hamming distance calculation (result save in a0, a1)
 hd_cal_loop:
     # c1 = x0 & 1, c2 = x1 & 1
-    li t3, 0x00000001
-    and t4, s4, t3
-    and t5, s6, t3
+    andi t4, s4, 1
+    andi t5, s6, 1
     
     # (s5 s4) = x >> 1
     srli t0, s4, 1
@@ -90,25 +89,10 @@ hd_check_loop:
 
 # count leading zeros
 count_leading_zero:
-    addi sp, sp, -4
-    sw ra, 0(sp)
-    beq a1, zero, clz_lower_set_one
-
-clz_upper_set_one:
-    srli t1, a1, 1
-    or a1, a1, t1
-    srli t1, a1, 2
-    or a1, a1, t1
-    srli t1, a1, 4
-    or a1, a1, t1
-    srli t1, a1, 8
-    or a1, a1, t1
-    srli t1, a1, 16
-    or a1, a1, t1
-    li a0, 0xffffffff
-    j clz_count_ones
-
-clz_lower_set_one:
+    beq a1, zero, 1f
+    mv a0, a1
+    li a1, 32           # if (y != 0) { x = y; y = 32; }
+1:
     srli t0, a0, 1
     or a0, a0, t0
     srli t0, a0, 2
@@ -119,104 +103,27 @@ clz_lower_set_one:
     or a0, a0, t0
     srli t0, a0, 16
     or a0, a0, t0
-
-clz_count_ones:
-    # x = (a1 a0)
     
-    # x -= ((x >> 1) & 0x5555555555555555); # 
-    srli t0, a0, 1
-    slli t1, a1, 31
-    or t0, t0, t1       # t0 >> 1
-    srli t1, a1, 1      # t1 >> 1
-
-    li t2, 0x55555555
-    and t0, t0, t2
-    and t1, t1, t2
-
-    sltu t3, a0, t0     # t3 : borrow bit
-    sub a0, a0, t0
-    sub a1, a1, t1
-    sub a1, a1, t3
-
-
-    # x = ((x >> 2) & 0x3333333333333333) + (x & 0x3333333333333333); #
+    # clz
+    
+    li t1, 0x55555555
+    and  t1, t0, t1
+    sub  a0, a0, t1      # x -= ((x >> 1) & 0x55555555)
     srli t0, a0, 2
-    slli t1, a1, 30
-    or t0, t0, t1       # t0 >> 2
-    srli t1, a1, 2      # t1 >> 2
-
-    li t2, 0x33333333
-    and t0, t0, t2
-    and t1, t1, t2
-    and t4, a0, t2
-    and t5, a1, t2
-
-    # (a1 a0) = (t1 t0) + (t5 t4)
-    add a0, t0, t4
-    sltu t3, a0, t0     # t3 : carry bit
-    add a1, t1, t5
-    add a1, a1, t3
-
-
-    # x = ((x >> 4) + x) & 0x0f0f0f0f0f0f0f0f; #
+    li t1, 0x33333333
+    and t2, t0, t1
+    and t3, a0, t1
+    add a0, t2, t3      # x = ((x >> 2) & 0x33333333) + (x & 0x33333333)
     srli t0, a0, 4
-    slli t1, a1, 28
-    or t0, t0, t1       # t0 >> 4
-    srli t1, a1, 4      # t1 >> 4
-    
     add t0, t0, a0
-    sltu t3, t0, a0     # t3 : carry bit
-    add t1, t1, a1
-    add t1, t1, t3
-
-    li t2, 0x0f0f0f0f
-    and a0, t0, t2
-    and a1, t1, t2
-
-
-    # x += (x >> 8); #
+    li t1, 0x0f0f0f0f
+    and a0, t0, t1      # x = ((x >> 4) + x) & 0x0f0f0f0f
     srli t0, a0, 8
-    slli t1, a1, 24
-    or t0, t0, t1       # t0 >> 8
-    srli t1, a1, 8      # t1 >> 8
-    
-    add a0, a0, t0
-    sltu t3, a0, t0     # t3 : carry bit
-    add a1, a1, t1
-    add a1, a1, t3      # (a1 a0) += (t1 t0)
-
-
-    # x += (x >> 16); #
+    add a0, a0, t0      # x += (x >> 8);
     srli t0, a0, 16
-    slli t1, a1, 16
-    or t0, t0, t1       # t0 >> 16
-    srli t1, a1, 16     # t1 >> 16
-    
-    add a0, a0, t0
-    sltu t3, a0, t0     # t3 : carry bit
-    add a1, a1, t1
-    add a1, a1, t3      # (a1 a0) += (t1 t0)
-
-
-    # x += (x >> 32); #
-    # (t1 t0) = x >> 32
-    mv t0, a1
-    mv t1, zero
-    
-    add a0, a0, t0
-    sltu t3, a0, t0     # t3 : carry bit
-    add a1, a1, t1
-    add a1, a1, t3      # (a1 a0) += (t1 t0)
-    
-    
-    # return (64 - (x & 0x7f));
-    # a0 = (x & 0x7f)
-    andi a0, a0, 0x7f   
-    li t0, 64
-    sub a0, t0, a0      # a0 = (64 - (x & 0x7f))
-    
-    lw ra, 0(sp)
-    addi sp, sp, 4
+    add a0, a0, t0      # x += (x >> 16);
+    li t1, 64
+    sub t1, t1, a1
+    andi t0, a0, 0x7f
+    sub a0, t1, t0      # return 64 - y - (x & 0x7f);
     ret
-
-.size HammingDistance_s, .-HammingDistance_s
