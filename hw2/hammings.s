@@ -44,19 +44,21 @@ endparam:
     li s3, 0            # s3: hdist counter
     
     li t3, 32
-    blt s2, t3, loop1e
+    ble s2, t3, loop1e
 loop1s:
     xor t0, s5, s7
-    andi s3, t0, 1
+    andi t0, t0, 1
+    add s3, s3, t0
     srli s5, s5, 1
     srli s7, s7, 1
     addi s2, s2, -1
     bgt s2, t3, loop1s
 loop1e:
-    blt s2, zero, loop1e
+    ble s2, zero, loop2e
 loop2s:
     xor t0, s4, s6
-    andi s4, t0, 1
+    andi t0, t0, 1
+    add s3, s3, t0
     srli s4, s4, 1
     srli s6, s6, 1
     addi s2, s2, -1
@@ -64,8 +66,6 @@ loop2s:
 loop2e:
     mv a0, s3
     
-    
-hd_func_end:
     lw ra, 0(sp)
     lw s0, 4(sp)
     lw s1, 8(sp)
