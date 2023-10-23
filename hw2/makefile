@@ -1,4 +1,4 @@
-.PHONY: clean Oz Oa Ob Oc Os Of
+.PHONY: clean
 
 include toolchain.mk
 
