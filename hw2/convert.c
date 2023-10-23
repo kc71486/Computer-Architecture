@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "convert.h"
 
-int32_t itos(int32_t input, char *str, int32_t strsize) {
+uint32_t itos(int32_t input, char *str, uint32_t strsize) {
     //otherwise it will not put anything
     if(input == 0) {
         if(strsize < 2) {
@@ -41,6 +41,7 @@ int32_t itos(int32_t input, char *str, int32_t strsize) {
             bufidx += 1;
         }
         buf[bufidx] = '-';
+        bufidx += 1;
     }
     else {
         while(input > 0) {

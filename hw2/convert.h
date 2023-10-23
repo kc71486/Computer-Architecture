@@ -12,6 +12,6 @@
  * return:
  *   convert size (includes ending '\0')
  */
-int32_t itos(int32_t input, char *str, int32_t strsize);
+uint32_t itos(int32_t input, char *str, uint32_t strsize);
 
 #endif
