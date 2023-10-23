@@ -1,6 +1,6 @@
 #!/bin/bash
 make
-if [[ $? -ne 0 ]]
+if [ $? -ne 0 ]
 then
   exit
 fi
