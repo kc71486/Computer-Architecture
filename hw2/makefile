@@ -3,7 +3,7 @@
 include toolchain.mk
 
 ASFLAGS = -march=rv32i_zicsr -mabi=ilp32
-CFLAGS = -O0 -Wall -Wextra
+CFLAGS = -Wall -Wextra -O0
 
 OBJS = \
     main.o \
