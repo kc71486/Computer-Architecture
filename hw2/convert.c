@@ -31,8 +31,8 @@ uint32_t itos(int32_t input, char *str, uint32_t strsize) {
         return 2;
     }
     char buf[12] = {0};
-    int32_t bufidx = 0;
-    int32_t stridx = 0;
+    uint32_t bufidx = 0;
+    uint32_t stridx = 0;
     if(input < 0) {
         input = 0 - input;
         while(input > 0) {
