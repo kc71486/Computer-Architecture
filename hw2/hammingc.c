@@ -33,7 +33,7 @@ int32_t HammingDistance_c(uint64_t x0, uint64_t x1) {
     }
     return Hdist;
 }
-
+/*
 int32_t HammingDistancev2_c(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1) {
     int32_t Hdist = 0;
     int x = 0, y = 0;
@@ -67,4 +67,4 @@ int32_t HammingDistancev2_c(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1) 
         max_digit -= 1;
     }
     return Hdist;
-}
+}*/
