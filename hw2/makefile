@@ -1,9 +1,11 @@
-.PHONY: clean
+.PHONY: clean Oz Oa Ob Oc Os Of
 
 include toolchain.mk
 
-ASFLAGS = -march=rv32i_zicsr -mabi=ilp32
-CFLAGS = -Wall -Wextra -O0
+OLVL := -O0
+ASFLAGS := -march=rv32i_zicsr -mabi=ilp32
+CFLAGS := -Wall -Wextra $(OLVL)
+
 
 OBJS = \
     main.o \
