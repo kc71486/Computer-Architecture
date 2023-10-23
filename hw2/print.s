@@ -10,7 +10,7 @@
 
 .bss
     pch:  .byte 0, 0
-    pint: .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    pint: .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 .text
 .align 2
