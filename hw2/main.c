@@ -26,18 +26,18 @@ int main(){
     int32_t d3 = HammingDistance_s(&test3_x0, &test3_x1);
     uint32_t end = get_cycles();
     // first print method
-    printstr("Elapse cycle:", 14);
+    printstr("Elapse cycle:", 13);
     int strsize = itos(end - start, intbuf, 12);
     printstr(intbuf, strsize);
     printchar('\n');
     // second print method
-    printstr("Hamming Distance:", 18);
+    printstr("Hamming Distance:", 17);
     printint(d1);
     printchar('\n');
-    printstr("Hamming Distance:", 18);
+    printstr("Hamming Distance:", 17);
     printint(d2);
     printchar('\n');
-    printstr("Hamming Distance:", 18);
+    printstr("Hamming Distance:", 17);
     printint(d3);
     printchar('\n');
     return 0;

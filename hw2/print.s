@@ -43,7 +43,7 @@ printint:
     mv a1, s1           # fake string
     li a2, INTBUFSIZE
     call  itos          # convert to string
-    mv a2, a0           # get return value as size
+    addi a2, a0, -1     # get (return value - 1) as size
     mv a1, s1           # same fake string
     li a0, STDOUT       # write to stdout
     li a7, SYSWRITE
