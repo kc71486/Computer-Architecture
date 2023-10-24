@@ -14,30 +14,11 @@ function runprogram() {
   make clean
 }
 
-function showhelp() {
-  echo "extra options:"
-  echo "  help: show help"
-  echo "  all: run all"
-  echo "  Ox: run with Ox optimizationin c form"
-  echo "  asm: run with O0 optimizationin asm form"
-  echo "  asmO2: run with O2 optimizationin asm form"
-}
-
-
 optims=( "-O0" "-O1" "-O2" "-O3" "-Os" "-Ofast" )
 if [ $# -eq 0 ]
 then
   make
   runprogram $? "-O0"
-elif [ "$1" = "help" ]
-then
-  showhelp
-elif [ "$1" = "-h" ]
-then
-  showhelp
-elif [ "$1" = "--help" ]
-then
-  showhelp
 elif [ "$1" = "all" ]
 then
   for i in "${optims[@]}"
@@ -47,14 +28,10 @@ then
   done
 elif [ "$1" = "asm" ]
 then
-  make OLVL=-O0
-  runprogram $? "-asm-O0"
-elif [ "$1" = "asmO2" ]
-then
-  make OLVL=-O0
-  runprogram $? "-asm-O2"
+  make OLVL=-O2
+  runprogram $? "-asm"
 else
-  make OLVL="-${1}"
-  runprogram $? "-${1}"
+  make OLVL=$1
+  runprogram $? $1
 fi
 echo "finished"
