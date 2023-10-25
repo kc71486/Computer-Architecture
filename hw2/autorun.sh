@@ -18,9 +18,9 @@ function showhelp() {
   echo "extra options:"
   echo "  help: show help"
   echo "  all: run all"
-  echo "  Ox: run with Ox optimizationin c form"
-  echo "  asm: run with O0 optimizationin asm form"
-  echo "  asmO2: run with O2 optimizationin asm form"
+  echo "  Ox: run with Ox optimization in c form"
+  echo "  asm: run with O0 optimization in asm form"
+  echo "  asmO2: run with O2 optimization in asm form"
 }
 
 
@@ -29,13 +29,7 @@ if [ $# -eq 0 ]
 then
   make
   runprogram $? "-O0"
-elif [ "$1" = "help" ]
-then
-  showhelp
-elif [ "$1" = "-h" ]
-then
-  showhelp
-elif [ "$1" = "--help" ]
+elif [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
 then
   showhelp
 elif [ "$1" = "all" ]
@@ -45,14 +39,24 @@ then
     make OLVL=$i
     runprogram $? $i
   done
-elif [ "$1" = "asm" ]
-then
+  sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
   make OLVL=-O0
   runprogram $? "-asm-O0"
+  make OLVL=-O2
+  runprogram $? "-asm-O2"
+  sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
+elif [ "$1" = "asm" ]
+then
+  sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
+  make OLVL=-O0
+  runprogram $? "-asm-O0"
+  sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
 elif [ "$1" = "asmO2" ]
 then
-  make OLVL=-O0
+  sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
+  make OLVL=-O2
   runprogram $? "-asm-O2"
+  sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
 else
   make OLVL="-${1}"
   runprogram $? "-${1}"
