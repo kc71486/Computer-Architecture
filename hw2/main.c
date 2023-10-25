@@ -36,7 +36,7 @@ int main(){
     printstr(intbuf, strsize - 1);
     printchar('\n');
     printstr("Instruction count:", 18);
-    int strsize = itos(endinstr - startinstr, intbuf, 12);
+    strsize = itos(endinstr - startinstr, intbuf, 12);
     printstr(intbuf, strsize - 1);
     printchar('\n');
     // second print method
