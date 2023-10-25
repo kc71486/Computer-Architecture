@@ -24,9 +24,9 @@ HammingDistance_s:
     mv t3, a3
     
     # compare x0 with x1
-    bgt s5, s7, 1f
-    blt s5, s7, 2f
-    bgt s4, s6, 1f
+    bgtu s5, s7, 1f
+    bltu s5, s7, 2f
+    bgtu s4, s6, 1f
     j  2f
 1:
     mv a0, s4           # a0 : lower part of x0
@@ -75,7 +75,7 @@ HammingDistance_s:
     li a0, 0            # a0: hdist counter
     
     li a3, 32
-    ble a1, a3, 6f
+    bleu a1, a3, 6f
 5:
     xor a2, s5, s7
     andi a2, a2, 1
@@ -83,9 +83,9 @@ HammingDistance_s:
     srli s5, s5, 1
     srli s7, s7, 1
     addi a1, a1, -1
-    bgt a1, a3, 5b
+    bgtu a1, a3, 5b
 6:
-    ble a1, zero, 8f
+    bleu a1, zero, 8f
 7:
     xor a2, s4, s6
     andi a2, a2, 1
@@ -93,7 +93,7 @@ HammingDistance_s:
     srli s4, s4, 1
     srli s6, s6, 1
     addi a1, a1, -1
-    bgt a1, zero, 7b
+    bgtu a1, zero, 7b
 8:
     lw ra, 0(sp)
     lw s0, 4(sp)
