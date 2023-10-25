@@ -1,4 +1,5 @@
 .global get_cycles
+.global get_instret
 
 .text
 .align 2
@@ -11,4 +12,10 @@ get_cycles:
     bne a1, a2, get_cycles
     ret
 
-.size get_cycles,.-get_cycles
+get_instret:
+    csrr a1, instreth
+    csrr a0, instret
+    csrr a2, instreth
+    bne a1, a2, get_instret
+    ret
+
