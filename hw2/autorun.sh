@@ -10,7 +10,7 @@ function runprogram() {
   riscv-none-elf-size hammingdistance.elf >> "out${2}"
   echo "execution result:" >> "out${2}"
   rv32emu hammingdistance.elf >> "out${2}"
-  riscv-none-elf-objdump -d hammingdistance.elf >> "dump${2}"
+  riscv-none-elf-objdump -d hammingdistance.elf > "dump${2}"
   make clean
 }
 
