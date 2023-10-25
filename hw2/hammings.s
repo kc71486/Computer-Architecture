@@ -23,7 +23,6 @@ HammingDistance_s:
     mv a0, t2           # a0 : lower part of x1
     mv a1, t3           # a1 : higher part of x1
 3:
-    
     # count leading zeros
     beq a1, zero, 4f
     mv a0, a1
