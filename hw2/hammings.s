@@ -6,8 +6,6 @@
 HammingDistance_s:
     addi sp, sp, -36
     sw ra, 0(sp)
-    sw s0, 4(sp)        # address of x0
-    sw s1, 8(sp)        # address of x1
     sw s2, 12(sp)       # max_digit
     sw s3, 16(sp)       # hdist counter
     sw s4, 20(sp)       # lower part of x0
@@ -15,15 +13,11 @@ HammingDistance_s:
     sw s6, 28(sp)       # lower part of x1
     sw s7, 32(sp)       # higher part of x1
 
-    # get address of x0 and x1
-    mv s0, a0           # s0 : address of x0
-    mv s1, a1           # s1 : address of x1
-
     # get x0(s5 s4) and x1(s7 s6)
-    lw s4, 0(s0)
-    lw s5, 4(s0)
-    lw s6, 0(s1)
-    lw s7, 4(s1)
+    mv s4, a0
+    mv s5, a1
+    mv s6, a2
+    mv s7, a3
     
     # compare x0 with x1
     bgt s5, s7, paramx0
