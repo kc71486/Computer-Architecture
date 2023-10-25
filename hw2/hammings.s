@@ -4,37 +4,24 @@
 .align 2
 # hamming distance function
 HammingDistance_s:
-    addi sp, sp, -36
-    sw ra, 0(sp)
-    sw s2, 12(sp)       # max_digit
-    sw s3, 16(sp)       # hdist counter
-    sw s4, 20(sp)       # lower part of x0
-    sw s5, 24(sp)       # higher part of x0
-    sw s6, 28(sp)       # lower part of x1
-    sw s7, 32(sp)       # higher part of x1
 
     # get x0(s5 s4) and x1(s7 s6)
-    mv s4, a0
-    mv s5, a1
-    mv s6, a2
-    mv s7, a3
-    mv t0, a0
-    mv t1, a1
-    mv t2, a2
-    mv t3, a3
+    mv t0, a0           # lower part of x0
+    mv t1, a1           # higher part of x0
+    mv t2, a2           # lower part of x1
+    mv t3, a3           # higher part of x1
     
-    # compare x0 with x1
-    bgtu s5, s7, 1f
-    bltu s5, s7, 2f
-    bgtu s4, s6, 1f
+    bgtu t1, t3, 1f     # compare x0 with x1 unsigned, my previous version had bug
+    bltu t1, t3, 2f
+    bgtu t0, t2, 1f
     j  2f
 1:
-    mv a0, s4           # a0 : lower part of x0
-    mv a1, s5           # a1 : higher part of x0
+    mv a0, t0           # a0 : lower part of x0
+    mv a1, t1           # a1 : higher part of x0
     j  3f
 2:
-    mv a0, s6           # a0 : lower part of x1
-    mv a1, s7           # a1 : higher part of x1
+    mv a0, t2           # a0 : lower part of x1
+    mv a1, t3           # a1 : higher part of x1
 3:
     
     # count leading zeros
@@ -69,40 +56,28 @@ HammingDistance_s:
     srli a5, a0, 16
     add a0, a0, a5      # x += (x >> 16);
     andi a5, a0, 0x7f
-    add a0, a1, a5      # return y + (x & 0x7f);
-    
-    mv a1, a0           # a1 : max_digit (return value saved in a0)
+    add a1, a1, a5      # return y + (x & 0x7f) --> max_digit
     li a0, 0            # a0: hdist counter
     
     li a3, 32
     bleu a1, a3, 6f
 5:
-    xor a2, s5, s7
+    xor a2, t1, t3
     andi a2, a2, 1
     add a0, a0, a2
-    srli s5, s5, 1
-    srli s7, s7, 1
+    srli t1, t1, 1
+    srli t3, t3, 1
     addi a1, a1, -1
     bgtu a1, a3, 5b
 6:
     bleu a1, zero, 8f
 7:
-    xor a2, s4, s6
+    xor a2, t0, t2
     andi a2, a2, 1
     add a0, a0, a2
-    srli s4, s4, 1
-    srli s6, s6, 1
+    srli t0, t0, 1
+    srli t2, t2, 1
     addi a1, a1, -1
     bgtu a1, zero, 7b
 8:
-    lw ra, 0(sp)
-    lw s0, 4(sp)
-    lw s1, 8(sp)
-    lw s2, 12(sp)
-    lw s3, 16(sp)
-    lw s4, 20(sp)
-    lw s5, 24(sp)
-    lw s6, 28(sp)
-    lw s7, 32(sp)
-    addi sp, sp, 36
     ret
