@@ -21,7 +21,7 @@ static uint16_t count_leading_zeros(uint64_t x) {
 
 int32_t HammingDistance_c(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1) {
     uint64_t v0 = ((uint64_t) y0) << 32 | x0;
-    uint64_t v1 = ((uint64_t) y0) << 32 | x0;
+    uint64_t v1 = ((uint64_t) y1) << 32 | x1;
     int32_t Hdist = 0;
     int32_t max_digit = 64 - count_leading_zeros((v0 > v1)? v0 : v1);
     while(max_digit > 0){
