@@ -9,7 +9,7 @@ CFLAGS := -Wall -Wextra $(OLVL)
 
 OBJS = \
     main.o \
-    getcycles.o \
+    cycles.o \
     print.o \
     convert.o \
     hammingc.o \
