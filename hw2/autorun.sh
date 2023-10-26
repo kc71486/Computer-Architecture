@@ -36,11 +36,12 @@ elif [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
 then
   showhelp
 elif [ "$1" = "clean" ]
+then
   for i in "${filesuffixs[@]}"
   do
     if [ -f "out${i}" ] || [ -f "dump${i}" ]
     then
-      echo "removing out${i} dump${i} ..."
+      echo "removing out${i} and dump${i} ..."
       rm "out${i}" "dump${i}"
     fi
   done
