@@ -44,7 +44,6 @@ elif [ "$1" = "clean" ]
       rm "out${i}" "dump${i}"
     fi
   done
-  
 elif [ "$1" = "all" ]
 then
   for i in "${optims[@]}"
