@@ -6,10 +6,12 @@ function runprogram() {
     echo "make error, exit"
     exit
   fi
+  echo "output into out${2} ..."
   echo "program size:" > "out${2}"
   riscv-none-elf-size hammingdistance.elf >> "out${2}"
   echo "execution result:" >> "out${2}"
   rv32emu hammingdistance.elf >> "out${2}"
+  echo "dump into dump${2} ..."
   riscv-none-elf-objdump -d hammingdistance.elf > "dump${2}"
   make clean
 }
@@ -17,14 +19,15 @@ function runprogram() {
 function showhelp() {
   echo "extra options:"
   echo "  help: show help"
+  echo "  clean clear all out and dump file"
   echo "  all: run all"
-  echo "  Ox: run with Ox optimization in c form"
+  echo "  Ox: run with Ox optimization in c form (x=optimizion level)"
   echo "  asm: run with O0 optimization in asm form"
   echo "  asmO2: run with O2 optimization in asm form"
 }
 
-
 optims=( "-O0" "-O1" "-O2" "-O3" "-Os" "-Ofast" )
+filesuffixs=( "-O0" "-O1" "-O2" "-O3" "-Os" "-Ofast" "-asm-O0" "-asm-O2" )
 if [ $# -eq 0 ]
 then
   make
@@ -32,6 +35,16 @@ then
 elif [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
 then
   showhelp
+elif [ "$1" = "clean" ]
+  for i in "${filesuffixs[@]}"
+  do
+    if [ -f "out${i}" ] || [ -f "dump${i}" ]
+    then
+      echo "removing out${i} dump${i} ..."
+      rm "out${i}" "dump${i}"
+    fi
+  done
+  
 elif [ "$1" = "all" ]
 then
   for i in "${optims[@]}"
