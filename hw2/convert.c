@@ -41,7 +41,7 @@ uint32_t itos(int32_t input, char *str, uint32_t strsize) {
         uinput = 0 - input;
         while(uinput > 0) {
             buf[bufidx] = (char) (umod32(uinput, 10) + 48);
-            uinput /= udiv32(uinput, 10);
+            uinput = udiv32(uinput, 10);
             bufidx += 1;
         }
         buf[bufidx] = '-';
@@ -51,7 +51,7 @@ uint32_t itos(int32_t input, char *str, uint32_t strsize) {
         uinput = input;
         while(uinput > 0) {
             buf[bufidx] = (char) (umod32(uinput, 10) + 48);
-            uinput /= udiv32(uinput, 10);
+            uinput = udiv32(uinput, 10);
             bufidx += 1;
         }
     }
