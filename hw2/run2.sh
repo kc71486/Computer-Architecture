@@ -80,6 +80,24 @@ then
   make OLVL=-O2
   runprogram $? "-asm-O2"
   sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
+elif [ "$1" = "main" ]
+then
+  mv main.c mainc.c
+  mv mains.c main.c
+  make OLVL=-O0
+  runprogram $? "-main-O0"
+  mv main.c mains.c
+  mv mainc.c main.c
+elif [ "$1" = "mainasm" ]
+then
+  sed -i "s/HammingDistance_c/HammingDistance_s/g" mains.s
+  mv main.c mainc.c
+  mv mains.c main.c
+  make OLVL=-O0
+  runprogram $? "-asm-O0"
+  mv main.c mains.c
+  mv mainc.c main.c
+  sed -i "s/HammingDistance_s/HammingDistance_c/g" mains.s
 else
   make OLVL="-${1}"
   runprogram $? "-${1}"
