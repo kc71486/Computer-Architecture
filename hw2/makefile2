@@ -2,6 +2,9 @@
 
 include toolchain.mk
 
+ASTOOL := gcc
+LDTOOL := gcc
+
 OLVL := -O0
 ABIFLAGS := -march=rv32i_zicsr -mabi=ilp32
 CFLAGS := -Wall -Wextra $(OLVL)

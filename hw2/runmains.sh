@@ -45,39 +45,51 @@ then
       rm "out-asm${i}" "dump-asm${i}"
     fi
   done
-elif [ $1 == "asm" ]
+elif [ $1 = "all" ]
 then
-  sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
   mv main.c mainc.c
   mv mains.s main.s
-  mv makefile makefile1
-  mv makefile2 makefile
+  for i in "${optims[@]}"
+  do
+    make ASTOOL=as LDTOOL=ld LDFLAGS="-T link.ld" OLVL=$i
+    runprogram $? $i
+    make clean
+  done
+  sed -i "s/HammingDistance_c/HammingDistance_s/g" mainc.c
+  for i in "${optims[@]}"
+  do
+    make ASTOOL=as LDTOOL=ld LDFLAGS="-T link.ld" OLVL=$i
+    runprogram $? "-asm${i}"
+    make clean
+  done
+  sed -i "s/HammingDistance_s/HammingDistance_c/g" mainc.c
+  mv main.s mains.s
+  mv mainc.c main.c
+elif [ $1 == "asm" ]
+then
+  mv main.c mainc.c
+  mv mains.s main.s
+  sed -i "s/HammingDistance_c/HammingDistance_s/g" mainc.c
   if [ $# -eq 1 ]
   then
-    make OLVL=-O0
+    make ASTOOL=as LDTOOL=ld LDFLAGS="-T link.ld" OLVL=-O0
     runprogram $? "-asm-O0"
     make clean
   else
-    make OLVL="-${1}"
+    make ASTOOL=as LDTOOL=ld LDFLAGS="-T link.ld" OLVL="-${1}"
     runprogram $? "-asm-${1}"
     make clean
   fi
-  mv makefile makefile2
-  mv makefile1 makefile
+  sed -i "s/HammingDistance_s/HammingDistance_c/g" mainc.c
   mv main.s mains.s
   mv mainc.c main.c
-  sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
 elif [[ $1 == O* ]]
 then
   mv main.c mainc.c
   mv mains.s main.s
-  mv makefile makefile1
-  mv makefile2 makefile
-  make OLVL=-O0
+  make ASTOOL=as LDTOOL=ld LDFLAGS="-T link.ld" OLVL=-O0
   runprogram $? "-O0"
   make clean
-  mv makefile makefile2
-  mv makefile1 makefile
   mv main.s mains.s
   mv mainc.c main.c
 else

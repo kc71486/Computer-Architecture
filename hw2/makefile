@@ -2,6 +2,9 @@
 
 include toolchain.mk
 
+ASTOOL := gcc
+LDTOOL := gcc
+
 OLVL := -O0
 ABIFLAGS := -march=rv32i_zicsr -mabi=ilp32
 GCCFLAGS := -fdata-sections -ffunction-sections
@@ -20,7 +23,7 @@ OBJS = \
 BIN = hammingdistance.elf
 
 %.o: %.s
-	$(CROSS_COMPILE)gcc $(GCCFLAGS) $(ABIFLAGS) -c -o $@ $<
+	$(CROSS_COMPILE)$(ASTOOL) $(GCCFLAGS) $(ABIFLAGS) -c -o $@ $<
 
 %.o: %.c
 	$(CROSS_COMPILE)gcc $(GCCFLAGS) $(ABIFLAGS) $(CFLAGS) -c -o $@ $<
@@ -28,7 +31,7 @@ BIN = hammingdistance.elf
 all: $(BIN)
 
 $(BIN): $(OBJS)
-	$(CROSS_COMPILE)gcc $(LDFLAGS) -o $@ $^
+	$(CROSS_COMPILE)$(LDTOOL) $(LDFLAGS) -o $@ $^
 
 clean:
 	$(RM) $(BIN) $(OBJS)
