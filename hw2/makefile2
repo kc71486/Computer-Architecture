@@ -11,6 +11,7 @@ OBJS = \
     main.o \
     cycles.o \
     print.o \
+    moddiv.o \
     convert.o \
     hammingc.o \
     hammings.o
