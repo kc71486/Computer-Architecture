@@ -8,7 +8,6 @@
 .extern printchar
 .extern printint
 
-.global start
 .global main
 
 .data
@@ -31,12 +30,6 @@
 
 .text
 .align 2
-exit:
-    li a7, SYSEXIT
-    ecall
-start:
-    call main
-    j exit
 main:
     add	 sp,sp,-48
     sw  ra,44(sp)
