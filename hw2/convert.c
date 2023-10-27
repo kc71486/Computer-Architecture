@@ -48,9 +48,9 @@ uint32_t itos(int32_t input, char *str, uint32_t strsize) {
         }
         buf[bufidx] = '-';
         bufidx += 1;
+        printchar('b');
+        printchar('\n');
     }
-    printchar('b');
-    printchar('\n');
     else {
         uinput = input;
         while(uinput > 0) {
@@ -58,6 +58,8 @@ uint32_t itos(int32_t input, char *str, uint32_t strsize) {
             uinput = udiv32(uinput, 10);
             bufidx += 1;
         }
+        printchar('b');
+        printchar('\n');
     }
     // will buffer overflow
     if(bufidx > strsize) {
