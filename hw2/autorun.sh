@@ -75,7 +75,7 @@ then
     make clean
   fi
   sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
-elif [ $1 = O* ]
+elif [[ $1 = O* ]]
 then
   make OLVL="-${1}"
   runprogram $? "-${1}"
