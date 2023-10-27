@@ -44,6 +44,11 @@ then
       echo "removing out${i} and dump${i} ..."
       rm "out${i}" "dump${i}"
     fi
+    if [ -f "out-asm${i}" ] || [ -f "dump-asm${i}" ]
+    then
+      echo "removing out-asm${i} and dump-asm${i} ..."
+      rm "out-asm${i}" "dump-asm${i}"
+    fi
   done
 elif [ "$1" = "all" ]
 then
