@@ -126,5 +126,7 @@ main:
     lw  ra,44(sp)
     lw  s0,40(sp)
     add  sp,sp,48
+    li a7, SYSEXIT
+    ecall
     ret
     
