@@ -9,6 +9,7 @@
 .extern printint
 
 .global start
+.global main
 
 .data
     t1_x0: .word 0x00100000
@@ -131,6 +132,5 @@ main:
     lw  ra,44(sp)
     lw  s0,40(sp)
     add  sp,sp,48
-    li a7, SYSEXIT
-    ecall
+    ret
     
