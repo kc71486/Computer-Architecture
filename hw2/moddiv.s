@@ -32,6 +32,6 @@ udiv32:
 # copy from gcc
 umod32:
     mv  t0, ra
-    jal   udiv32
+    jal  udiv32
     mv  a0, a1
-    jr    t0
+    jr  t0
