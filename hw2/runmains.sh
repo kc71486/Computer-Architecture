@@ -30,7 +30,7 @@ optims=( "-O0" "-O1" "-O2" "-O3" "-Os" "-Ofast" )
 if [ $# -eq 0 ] || [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
 then
   showhelp
-elif [ "$1" == "clean" ]
+elif [ $1 == "clean" ]
 then
   for i in "${optims[@]}"
   do
@@ -45,7 +45,7 @@ then
       rm "out-asm${i}" "dump-asm${i}"
     fi
   done
-elif [ "$1" == "asm" ]
+elif [ $1 == "asm" ]
 then
   sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
   mv main.c mainc.c
@@ -67,7 +67,7 @@ then
   mv main.s mains.s
   mv mainc.c main.c
   sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
-elif [ "$1" == O* ]
+elif [ $1 == O* ]
 then
   mv main.c mainc.c
   mv mains.s main.s
