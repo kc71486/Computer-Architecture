@@ -58,7 +58,7 @@ then
   sed -i "s/HammingDistance_c/HammingDistance_s/g" mainc.c
   for i in "${optims[@]}"
   do
-    make ASTOOL=as LDTOOL=ld ASFLAGS= LDFLAGS="-T link.ld" OLVL=$i
+    make ASTOOL=as LDTOOL=ld ASFLAGS="" LDFLAGS="-T link.ld" OLVL=$i
     runprogram $? "-asm${i}"
     make clean
   done
@@ -87,7 +87,7 @@ elif [[ $1 == O* ]]
 then
   mv main.c mainc.c
   mv mains.s main.s
-  make ASTOOL=as LDTOOL=ld LDFLAGS="-T link.ld" OLVL=-O0
+  make ASTOOL=as LDTOOL=ld ASFLAGS= LDFLAGS="-T link.ld" OLVL=-O0
   runprogram $? "-O0"
   make clean
   mv main.s mains.s
