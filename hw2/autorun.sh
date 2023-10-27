@@ -70,8 +70,8 @@ then
     runprogram $? "-asm-O0"
     make clean
   else
-    make OLVL="-${1}"
-    runprogram $? "-asm-${1}"
+    make OLVL="-${2}"
+    runprogram $? "-asm-${2}"
     make clean
   fi
   sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
