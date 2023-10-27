@@ -23,10 +23,10 @@
     t3_y0: .word 0x8370228F
     t3_x1: .word 0x00000002
     t3_y1: .word 0x8370228F
-    intbuf: .char 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    cyclestr: .str "Elapse cycle:"
-    instrstr: .str "Instruction count:"
-    hamstr: .str "Hamming Distance:"
+    intbuf: .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    cyclestr: .string "Elapse cycle:"
+    instrstr: .string "Instruction count:"
+    hamstr: .string "Hamming Distance:"
 
 .text
 exit:
