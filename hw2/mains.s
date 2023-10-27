@@ -30,6 +30,7 @@
     hamstr: .string "Hamming Distance:"
 
 .text
+.align 2
 exit:
     li a7, SYSEXIT
     ecall
