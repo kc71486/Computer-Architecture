@@ -16,20 +16,21 @@ function runprogram() {
 }
 
 function showhelp() {
-  echo "extra options:"
+  echo "uses as and ld and main.s"
+  echo "options:"
   echo "  help: show help"
   echo "  clean clear all out and dump file"
   echo "  all: run all"
   echo "  Ox: run with Ox optimization in c form (x=optimizion level)"
   echo "  asm: run with O0 optimization in asm form"
-  echo "  asmO2: run with O2 optimization in asm form"
+  echo "  asm Ox: run with Ox optimization in asm form  (x=optimizion level)"
 }
 
 optims=( "-O0" "-O1" "-O2" "-O3" "-Os" "-Ofast" )
 if [ $# -eq 0 ] || [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
 then
   showhelp
-elif [ "$1" = "clean" ]
+elif [ "$1" == "clean" ]
 then
   for i in "${optims[@]}"
   do
@@ -44,23 +45,29 @@ then
       rm "out-asm${i}" "dump-asm${i}"
     fi
   done
-elif [ "$1" = "asm" ]
+elif [ "$1" == "asm" ]
 then
   sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
   mv main.c mainc.c
   mv mains.s main.s
   mv makefile makefile1
   mv makefile2 makefile
-  make OLVL=-O0
-  runprogram $? "-asm-O0"
-  make clean
+  if [ $# -eq 1 ]
+  then
+    make OLVL=-O0
+    runprogram $? "-asm-O0"
+    make clean
+  else
+    make OLVL="-${1}"
+    runprogram $? "-asm-${1}"
+    make clean
+  fi
   mv makefile makefile2
   mv makefile1 makefile
   mv main.s mains.s
   mv mainc.c main.c
   sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
-elif [ "$1" = "c" ]
-then
+elif [ "$1" == O* ]
   mv main.c mainc.c
   mv mains.s main.s
   mv makefile makefile1
@@ -73,7 +80,7 @@ then
   mv main.s mains.s
   mv mainc.c main.c
 else
-  echo "else"
+  echo "unknown option"
   exit
 fi
 echo "finished"
