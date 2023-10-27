@@ -7,6 +7,7 @@ LDTOOL := gcc
 
 OLVL := -O0
 ABIFLAGS := -march=rv32i_zicsr -mabi=ilp32
+ASFLAGS := -fdata-sections -ffunction-sections
 GCCFLAGS := -fdata-sections -ffunction-sections
 CFLAGS := -Wall -Wextra $(OLVL)
 LDFLAGS := -Wl,--gc-sections
@@ -23,7 +24,7 @@ OBJS = \
 BIN = hammingdistance.elf
 
 %.o: %.s
-	$(CROSS_COMPILE)$(ASTOOL) $(GCCFLAGS) $(ABIFLAGS) -c -o $@ $<
+	$(CROSS_COMPILE)$(ASTOOL) $(ASFLAGS) $(ABIFLAGS) -c -o $@ $<
 
 %.o: %.c
 	$(CROSS_COMPILE)gcc $(GCCFLAGS) $(ABIFLAGS) $(CFLAGS) -c -o $@ $<
