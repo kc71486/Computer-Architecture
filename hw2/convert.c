@@ -31,7 +31,7 @@ uint32_t itos(int32_t input, char *str, uint32_t strsize) {
         str[9] = '4';
         str[10] = '8';
         str[11] = 0;
-        return 2;
+        return 12;
     }
     char buf[12] = {0};
     uint32_t bufidx = 0;
@@ -65,7 +65,5 @@ uint32_t itos(int32_t input, char *str, uint32_t strsize) {
         stridx ++;
     }
     str[stridx] = 0;
-    printchar('c');
-    printchar('\n');
     return stridx + 1;
 }
