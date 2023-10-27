@@ -19,7 +19,7 @@ OBJS = \
 BIN = hammingdistance.elf
 
 %.o: %.s
-	$(CROSS_COMPILE)gcc $(GCCFLAGS) $(ABIFLAGS) -c -o $@ $<
+	$(CROSS_COMPILE)as $(GCCFLAGS) $(ABIFLAGS) -c -o $@ $<
 
 %.o: %.c
 	$(CROSS_COMPILE)gcc $(GCCFLAGS) $(ABIFLAGS) $(CFLAGS) -c -o $@ $<

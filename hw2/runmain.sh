@@ -49,9 +49,13 @@ then
   sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
   mv main.c mainc.c
   mv mains.s main.s
+  mv makefile makefile1
+  mv makefile2 makefile
   make OLVL=-O0
   runprogram $? "-asm-O0"
   make clean
+  mv makefile makefile2
+  mv makefile1 makefile
   mv main.s mains.s
   mv mainc.c main.c
   sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
@@ -59,9 +63,13 @@ elif [ "$1" = "c" ]
 then
   mv main.c mainc.c
   mv mains.s main.s
+  mv makefile makefile1
+  mv makefile2 makefile
   make OLVL=-O0
   runprogram $? "-O0"
   make clean
+  mv makefile makefile2
+  mv makefile1 makefile
   mv main.s mains.s
   mv mainc.c main.c
 else
