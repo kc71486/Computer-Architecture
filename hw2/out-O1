@@ -1,0 +1,10 @@
+program size:
+   text	   data	    bss	    dec	    hex	filename
+   2656	    312	    780	   3748	    ea4	hammingdistance.elf
+execution result:
+Elapse cycle:2692
+Instruction count:2706
+Hamming Distance:24
+Hamming Distance:60
+Hamming Distance:0
+inferior exit code 0

@@ -1,0 +1,10 @@
+program size:
+   text	   data	    bss	    dec	    hex	filename
+   2720	    364	    784	   3868	    f1c	hammingdistance.elf
+execution result:
+Elapse cycle:1608
+Instruction count:1626
+Hamming Distance:24
+Hamming Distance:60
+Hamming Distance:0
+inferior exit code 0

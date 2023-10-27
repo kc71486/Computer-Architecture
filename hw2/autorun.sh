@@ -64,6 +64,12 @@ then
   make OLVL=-O0
   runprogram $? "-asm-O0"
   sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
+elif [ "$1" = "asmO1" ]
+then
+  sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
+  make OLVL=-O1
+  runprogram $? "-asm-O1"
+  sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
 elif [ "$1" = "asmO2" ]
 then
   sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
