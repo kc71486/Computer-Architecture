@@ -94,7 +94,7 @@ then
   mv main.c mainc.c
   mv mains.s main.s
   make OLVL=-O0
-  runprogram $? "-asm-O0"
+  runprogram $? "-main-asm-O0"
   mv main.s mains.s
   mv mainc.c main.c
   sed -i "s/HammingDistance_s/HammingDistance_c/g" mains.s
