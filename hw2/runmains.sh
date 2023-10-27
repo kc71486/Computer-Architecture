@@ -68,6 +68,7 @@ then
   mv mainc.c main.c
   sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
 elif [ "$1" == O* ]
+then
   mv main.c mainc.c
   mv mains.s main.s
   mv makefile makefile1
