@@ -5,7 +5,7 @@ include toolchain.mk
 OLVL := -O0
 ABIFLAGS := -march=rv32i_zicsr -mabi=ilp32
 CFLAGS := -Wall -Wextra $(OLVL)
-LDFLAGS := -T hello.ld
+LDFLAGS := -T link.ld
 
 OBJS = \
     main.o \
