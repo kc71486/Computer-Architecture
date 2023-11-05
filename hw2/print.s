@@ -29,7 +29,7 @@ printchar:
     la a1, pch          # fake string
     sw a0, 0(a1)        # put char into fake string
     li a0, STDOUT       # write to stdout
-    la a2, 1            # length = 2
+    la a2, 1            # length = 1
     li a7, SYSWRITE
     ecall               # invoke syscall
     ret
