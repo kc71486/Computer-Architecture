@@ -23,7 +23,7 @@ class Testbench extends AnyFlatSpec with ChiselScalatestTester {
   behavior.of("Single Cycle CPU Testbench")
   it should "execute full testbench" in {
     test(new TestTopModule("tb.asmbin")).withAnnotations(TestAnnotations.annos) { c =>
-      for (i <- 1 to 50000) {
+      for (i <- 1 to 10000) {
         c.clock.step()
         c.io.mem_debug_read_address.poke((i * 4).U) // Avoid timeout
       }

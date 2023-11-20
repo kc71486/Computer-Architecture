@@ -87,16 +87,8 @@ int main(){
     uint32_t t3_y0 = 0x8370228F;
     uint32_t t3_x1 = 0x00000002;
     uint32_t t3_y1 = 0x8370228F;
-    //*((volatile int32_t *) 4) = HammingDistance(t1_x0, t1_y0, t1_x1, t1_y1); //24
-    //*((volatile int32_t *) 8) = HammingDistance(t2_x0, t2_y0, t2_x1, t2_y1); //60
-    //*((volatile int32_t *) 12) = HammingDistance(t3_x0, t3_y0, t3_x1, t3_y1); //0
     *((volatile int32_t *) 4) = HammingDistance(t1_x0, t1_y0, t1_x1, t1_y1); //24
     *((volatile int32_t *) 8) = HammingDistance(t2_x0, t2_y0, t2_x1, t2_y1); //60
     *((volatile int32_t *) 12) = HammingDistance(t3_x0, t3_y0, t3_x1, t3_y1); //0
-    //printf("%d\n", *((int32_t *) 4));
-    //printf("%d\n", *((int32_t *) 8));
-    //printf("%d\n", *((int32_t *) 12));
-    //printf("%d\n", *((int32_t *) 16));
-    
     while(1);
 }
