@@ -1,0 +1,7 @@
+
+homework.elf:     file format elf32-littleriscv
+
+Contents of section .data:
+ 2000 00001000 00001300 ffff0f00 01000000  ................
+ 2010 02000000 ffffff7f feffffff 02000000  ................
+ 2020 8f227083 02000000 8f227083           ."p......"p.    
