@@ -8,7 +8,7 @@ _start:
   #just in case
   nop
   # set stack pointer
-  la sp, 0x1000
+  la sp, _sp
 
 _init:
   # jump to main

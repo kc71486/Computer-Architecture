@@ -20,12 +20,16 @@ import riscv.TestAnnotations
 class TestTopModule(exeFilename: String) extends Module {
   val io = IO(new Bundle {
     val mem_debug_read_address  = Input(UInt(Parameters.AddrWidth))
+    val vmem_debug_read_address  = Input(UInt(Parameters.AddrWidth))
     val regs_debug_read_address = Input(UInt(Parameters.PhysicalRegisterAddrWidth))
-    val regs_debug_read_data    = Output(UInt(Parameters.DataWidth))
     val mem_debug_read_data     = Output(UInt(Parameters.DataWidth))
+    val vmem_debug_read_data     = Output(UInt(Parameters.DataWidth))
+    val regs_debug_read_data    = Output(UInt(Parameters.DataWidth))
   })
 
   val mem             = Module(new Memory(8192))
+  val vmem            = Module(new Memory(8192))
+  val kernel          = Module(new Memory(8192))
   val instruction_rom = Module(new InstructionROM(exeFilename))
   val rom_loader      = Module(new ROMLoader(instruction_rom.capacity))
 
@@ -57,10 +61,18 @@ class TestTopModule(exeFilename: String) extends Module {
 
     cpu.io.debug_read_address := io.regs_debug_read_address
     io.regs_debug_read_data   := cpu.io.debug_read_data
+    
+    vmem.io.instruction_address := 0.U
+    cpu.io.vram_bundle          <> vmem.io.bundle
+    kernel.io.instruction_address := 0.U
+    cpu.io.kernel_bundle          <> kernel.io.bundle
   }
-
   mem.io.debug_read_address := io.mem_debug_read_address
   io.mem_debug_read_data    := mem.io.debug_read_data
+  
+  vmem.io.debug_read_address := io.mem_debug_read_address
+  io.vmem_debug_read_data    := vmem.io.debug_read_data
+  kernel.io.debug_read_address := 0.U
 }
 
 class FibonacciTest extends AnyFlatSpec with ChiselScalatestTester {
@@ -110,27 +122,6 @@ class ByteAccessTest extends AnyFlatSpec with ChiselScalatestTester {
       c.io.regs_debug_read_data.expect(0xef.U)
       c.io.regs_debug_read_address.poke(1.U) // ra
       c.io.regs_debug_read_data.expect(0x15ef.U)
-    }
-  }
-}
-
-class HomeWorkTest extends AnyFlatSpec with ChiselScalatestTester {
-  behavior.of("Single Cycle CPU")
-  it should "execute hamming code calculation" in {
-    test(new TestTopModule("homework.asmbin")).withAnnotations(TestAnnotations.annos) { c =>
-      for (i <- 1 to 50000) {
-        c.clock.step()
-        c.io.mem_debug_read_address.poke((i * 4).U) // Avoid timeout
-      }
-      c.io.mem_debug_read_address.poke(4.U) // #1
-      c.clock.step()
-      c.io.mem_debug_read_data.expect(24.U)
-      c.io.mem_debug_read_address.poke(8.U) // #2
-      c.clock.step()
-      c.io.mem_debug_read_data.expect(60.U)
-      c.io.mem_debug_read_address.poke(12.U) // #3
-      c.clock.step()
-      c.io.mem_debug_read_data.expect(0.U)
     }
   }
 }

@@ -21,10 +21,21 @@ class Top extends Module {
   io.debug_read_data        := cpu.io.debug_read_data
 
   io.memory_bundle <> cpu.io.memory_bundle
+  io.vram_bundle <> cpu.io.vram_bundle
+  io.kernel_bundle <> cpu.io.kernel_bundle
   io.instruction_address := cpu.io.instruction_address
   cpu.io.instruction     := io.instruction
 
   cpu.io.instruction_valid := io.instruction_valid
+  
+  io.ecall_en    := cpu.io.ecall_en
+  io.ecall_a7    := cpu.io.ecall_a7
+  io.ecall_a0    := cpu.io.ecall_a0
+  io.ecall_a1    := cpu.io.ecall_a1
+  io.ecall_a2    := cpu.io.ecall_a2
+  io.ecall_a3    := cpu.io.ecall_a3
+  io.ecall_a4    := cpu.io.ecall_a4
+  io.ecall_a5    := cpu.io.ecall_a5
 }
 
 object VerilogGenerator extends App {

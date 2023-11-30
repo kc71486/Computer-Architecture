@@ -199,3 +199,6 @@ verilog/verilator/*
 .Xil
 .vscode
 .metals
+
+# gtkimg
+gtkimg/*

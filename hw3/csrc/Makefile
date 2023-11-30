@@ -28,6 +28,7 @@ BINS = \
 	quicksort.asmbin \
 	sb.asmbin \
 	homework.asmbin \
+	homeworkc.asmbin \
 	tb.asmbin
 	
 

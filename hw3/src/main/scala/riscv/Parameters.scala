@@ -26,6 +26,8 @@ object Parameters {
   val PhysicalRegisters         = 32
   val PhysicalRegisterAddrBits  = log2Up(PhysicalRegisters)
   val PhysicalRegisterAddrWidth = PhysicalRegisterAddrBits.W
+  
+  val EcallArguments  = 6
 
   val CSRRegisterAddrBits  = 12
   val CSRRegisterAddrWidth = CSRRegisterAddrBits.W
@@ -45,3 +47,10 @@ object Parameters {
   val SlaveDeviceCount     = 8
   val SlaveDeviceCountBits = log2Up(Parameters.SlaveDeviceCount)
 }
+
+object SlaveType {
+  val UserMemory   = 0.U(Parameters.SlaveDeviceCountBits.W)
+  val VisualMemory = 1.U(Parameters.SlaveDeviceCountBits.W)
+  val KernelMemory = 2.U(Parameters.SlaveDeviceCountBits.W)
+}
+

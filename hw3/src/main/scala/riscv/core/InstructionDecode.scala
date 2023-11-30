@@ -137,6 +137,7 @@ class InstructionDecode extends Module {
     val wb_reg_write_source    = Output(UInt(2.W))
     val reg_write_enable       = Output(Bool())
     val reg_write_address      = Output(UInt(Parameters.PhysicalRegisterAddrWidth))
+    val do_ecall               = Output(Bool())
   })
   val opcode = io.instruction(6, 0)
   val funct3 = io.instruction(14, 12)
@@ -213,4 +214,6 @@ class InstructionDecode extends Module {
     (opcode === InstructionTypes.L) || (opcode === Instructions.auipc) || (opcode === Instructions.lui) ||
     (opcode === Instructions.jal) || (opcode === Instructions.jalr)
   io.reg_write_address := io.instruction(11, 7)
+  
+  io.do_ecall := io.instruction === InstructionsEnv.ecall
 }

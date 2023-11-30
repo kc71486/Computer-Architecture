@@ -7,6 +7,7 @@ import chisel3._
 import chisel3.util.Cat
 import riscv.CPUBundle
 import riscv.Parameters
+import riscv.SlaveType
 
 class CPU extends Module {
   val io = IO(new CPUBundle)
@@ -58,13 +59,44 @@ class CPU extends Module {
     0.U(Parameters.SlaveDeviceCountBits.W),
     mem.io.memory_bundle.address(Parameters.AddrBits - 1 - Parameters.SlaveDeviceCountBits, 0)
   )
-  io.memory_bundle.write_enable  := mem.io.memory_bundle.write_enable
+  io.memory_bundle.write_enable  :=
+    mem.io.memory_bundle.write_enable && 
+    mem.io.memory_bundle.address(Parameters.AddrBits - 1, Parameters.AddrBits - Parameters.SlaveDeviceCountBits) === SlaveType.UserMemory
   io.memory_bundle.write_data    := mem.io.memory_bundle.write_data
   io.memory_bundle.write_strobe  := mem.io.memory_bundle.write_strobe
   mem.io.memory_bundle.read_data := io.memory_bundle.read_data
+  
+  io.vram_bundle.address := Cat(
+    0.U(Parameters.SlaveDeviceCountBits.W),
+    mem.io.memory_bundle.address(Parameters.AddrBits - 1 - Parameters.SlaveDeviceCountBits, 0)
+  )
+  io.vram_bundle.write_enable  :=
+    mem.io.memory_bundle.write_enable && 
+    mem.io.memory_bundle.address(Parameters.AddrBits - 1, Parameters.AddrBits - Parameters.SlaveDeviceCountBits) === SlaveType.VisualMemory
+  io.vram_bundle.write_data    := mem.io.memory_bundle.write_data
+  io.vram_bundle.write_strobe  := mem.io.memory_bundle.write_strobe
+  
+  io.kernel_bundle.address := Cat(
+    0.U(Parameters.SlaveDeviceCountBits.W),
+    mem.io.memory_bundle.address(Parameters.AddrBits - 1 - Parameters.SlaveDeviceCountBits, 0)
+  )
+  io.kernel_bundle.write_enable  :=
+    mem.io.memory_bundle.write_enable && 
+    mem.io.memory_bundle.address(Parameters.AddrBits - 1, Parameters.AddrBits - Parameters.SlaveDeviceCountBits) === SlaveType.KernelMemory
+  io.kernel_bundle.write_data    := mem.io.memory_bundle.write_data
+  io.kernel_bundle.write_strobe  := mem.io.memory_bundle.write_strobe
 
   wb.io.instruction_address := inst_fetch.io.instruction_address
   wb.io.alu_result          := ex.io.mem_alu_result
   wb.io.memory_read_data    := mem.io.wb_memory_read_data
   wb.io.regs_write_source   := id.io.wb_reg_write_source
+  
+  io.ecall_en    := id.io.do_ecall
+  io.ecall_a7    := regs.io.ecall_a7
+  io.ecall_a0    := regs.io.ecall_a0
+  io.ecall_a1    := regs.io.ecall_a1
+  io.ecall_a2    := regs.io.ecall_a2
+  io.ecall_a3    := regs.io.ecall_a3
+  io.ecall_a4    := regs.io.ecall_a4
+  io.ecall_a5    := regs.io.ecall_a5
 }

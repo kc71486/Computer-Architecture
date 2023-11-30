@@ -25,6 +25,14 @@ class RegisterFile extends Module {
 
     val debug_read_address = Input(UInt(Parameters.PhysicalRegisterAddrWidth))
     val debug_read_data    = Output(UInt(Parameters.DataWidth))
+    
+    val ecall_a7      = Output(UInt(Parameters.DataWidth))
+    val ecall_a0      = Output(UInt(Parameters.DataWidth))
+    val ecall_a1      = Output(UInt(Parameters.DataWidth))
+    val ecall_a2      = Output(UInt(Parameters.DataWidth))
+    val ecall_a3      = Output(UInt(Parameters.DataWidth))
+    val ecall_a4      = Output(UInt(Parameters.DataWidth))
+    val ecall_a5      = Output(UInt(Parameters.DataWidth))
   })
   val registers = RegInit(VecInit(Seq.fill(Parameters.PhysicalRegisters)(0.U(Parameters.DataWidth))))
 
@@ -51,4 +59,12 @@ class RegisterFile extends Module {
     0.U,
     registers(io.debug_read_address)
   )
+  
+  io.ecall_a7 := registers(17.U);
+  io.ecall_a0 := registers(10.U);
+  io.ecall_a1 := registers(11.U);
+  io.ecall_a2 := registers(12.U);
+  io.ecall_a3 := registers(13.U);
+  io.ecall_a4 := registers(14.U);
+  io.ecall_a5 := registers(15.U);
 }
